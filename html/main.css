@@ -1,0 +1,81 @@
+html, body{
+    margin:0;
+    padding:0;
+    width: 100%;
+    height: 100vh;
+    font-family:  'Calibri';
+}
+
+p{
+    width: 2*inherit;
+    height: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: medium;
+    margin:0;
+    padding:0;
+}
+
+.opcje{
+    display: block;
+    height: 20%;
+    width:100%;
+    background-color: white;
+}
+
+.pasek_rodzaji{
+    display: block;
+    height: 20%;
+    width:100%;
+    background-color: rgb(255, 255, 255);
+}
+
+.Opcja-symulacji, .Opcja-tworzenia{
+    color:rgb(51, 51, 51);
+    width: 15%;
+    height: 100%;
+    display: inline-block;
+}
+
+.Opcja-symulacji:hover, .Opcja-tworzenia:hover{
+    color:blue;
+    cursor:default;
+}
+
+.trescWstazki{
+    display: block;
+    height: 80%;
+    width:100%;
+    background-color: rgb(255, 255, 255);
+    box-shadow:0px 0px 2px 0px black inset;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sterowanie, .pokazywanie, .material{
+    margin:20px;
+    padding:20px;
+    display: inline-block;
+    box-shadow: 0px 0px 2px 0px black inset;
+
+}
+
+.soczewki, .zrodla-swiatla{
+    margin:20px;
+    padding:20px;
+    display: inline-block;
+    box-shadow: 0px 0px 2px 0px black inset;
+}
+
+
+
+.obszar-symulacji{
+    margin:0;
+    padding:0;
+    display: block;
+    height: 80%;
+    width:100%;
+    background-color: white;
+}
