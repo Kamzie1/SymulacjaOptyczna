@@ -243,6 +243,7 @@ function dodajPrzycisk(id){
     przycisk.classList.add("przyciskObiektu");
 
     przycisk.onclick = function(){
+        localStorage.setItem('id_Obiektu', id);
         wyswietlWlasciwosci(id);
     }
     document.getElementById('lista-obiektow').appendChild(przycisk);
