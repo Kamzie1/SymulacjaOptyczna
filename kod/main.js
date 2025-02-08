@@ -6,20 +6,19 @@ canvas.style.width='100%';
 canvas.style.height='100%';
 let WYSOKOSC = canvas.height=canvas.offsetHeight;
 let SZEROKOSC = canvas.width=canvas.offsetWidth;
-let SZER_J = SZEROKOSC/10;
-let SZER_j = SZEROKOSC/100;
-let WYS_j = WYSOKOSC/100;
-let WYS_J = WYSOKOSC/10; 
+let j = 50;
 const ctx = canvas.getContext("2d");
 
 /// zmienne globalne
 
-const soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 1, id: 0};
+const soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
 const promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
 
 let os_Optyczna;
 let wstazka;
 let id_Obiektu=-1;
+let pokazOgniskowe = 0;
+let pokazGrid = 0;
 
 const kontener = document.getElementById("trescWstazki");
 
@@ -36,10 +35,8 @@ let Symulacja = `<div class="sterowanie" id="sterowanie">
                     <button class="wyszysc" id="wyczysc">Wyczyść</button>
                 </div>
                 <div class="pokazywanie">
-                    <form>
-                        <input type="checkbox" id="ogniskowe" value="tak">
-                        <label for="ogniskowe"> pokaż ogniskowe</label>
-                    </form>
+                    <button class="pokaz-ogniskowe" id="pokaz-ogniskowe"> </button>
+                    <button class="pokaz-grid" id="pokaz-grid">  </button>
                 </div>
                 <div class="material">
                     <form>
@@ -61,6 +58,7 @@ function rysuj(){
     ctx.clearRect(0, 0, SZEROKOSC, WYSOKOSC);
     rysuj_os();
     rysuj_obiekty();
+    rysujObiektyPomocnicze();
 }
 
 /// Funkcje odświeżania
@@ -71,6 +69,7 @@ window.onload = function(){
     zaladujOs();
     dodawanieEventListener();
     wyswietlWstazke(wstazka);
+    zaladujGrid();
 }
 
 function usunLocalStorage(){
@@ -78,6 +77,8 @@ function usunLocalStorage(){
         localStorage.removeItem('wstazka');
         localStorage.removeItem('os_Optyczna');
         localStorage.removeItem('id_Obiektu');
+        localStorage.removeItem('pokazOgniskowe');
+        localStorage.removeItem('pokazGrid');
         sessionStorage.setItem("sessionVisit", "true");
         location.reload();
     } 
@@ -125,6 +126,97 @@ function zaladujWstazke()
     {
         wstazka = "SYMULACJA";
         localStorage.setItem('wstazka', wstazka);
+    }
+}
+
+function zaladujOgniskowe(){
+    if(localStorage.getItem('pokazOgniskowe'))
+    {
+        pokazOgniskowe = localStorage.getItem('pokazOgniskowe');
+    }
+}
+
+function zaladujGrid(){
+    if(localStorage.getItem('pokazGrid'))
+    {
+        pokazGrid = localStorage.getItem('pokazGrid');
+    }
+}
+
+/// Funckje symulacji
+
+function filterOptyki(object){
+    return object.typ == "SoczS";
+}
+
+function filterZrodlaSwiatla(object){
+    return object.typ == "PromS";
+}
+
+function uruchomSymulacje(){
+    zaladujOs();
+    let zrodla_swiatla = os_Optyczna.filter(filterZrodlaSwiatla);
+    for(let i=0;i<zrodla_swiatla.length;i++){
+        Symuluj(zrodla_swiatla[i].wspx, zrodla_swiatla[i].wspy, zrodla_swiatla[i].alfa, os_Optyczna);
+    }
+}
+
+function wZasiegu(wspx, h, P, xo){
+    if(wspx<=xo)    return false;
+    if(WYSOKOSC/2+h<P)  return false;
+    if(WYSOKOSC/2-h>P)  return false;
+    return true;
+}
+
+function Symuluj(wspx, wspy, alfa, os_Optyczna){
+    let obiektyOptyczne = os_Optyczna.filter(filterOptyki);
+    let a, b, xo, yo, y_pomo, b_pomo;
+    xo = wspx;
+    yo = wspy;
+
+    a = Math.tan((Math.PI/180*(180-alfa)));
+    b = yo-a*xo;
+
+    ctx.beginPath();
+    ctx.lineWidth=2;
+    ctx.moveTo(xo, yo);
+
+    while(true){
+        let min = SZEROKOSC+100;
+        let min_id = -1;
+        for(let i=0;i<obiektyOptyczne.length;i++){
+            obiektyOptyczne[i].P = a*obiektyOptyczne[i].wspx + b;
+
+            if(!wZasiegu(obiektyOptyczne[i].wspx, obiektyOptyczne[i].h, obiektyOptyczne[i].P, xo)){
+                continue;
+            }
+
+            if(obiektyOptyczne[i].wspx<min){
+                min = obiektyOptyczne[i].wspx;
+                min_id = i;
+            }
+        }
+
+        if(min_id==-1){
+            if(a<0)
+                ctx.lineTo(-b/a,0);
+            else if(a==0)
+                ctx.lineTo(SZEROKOSC, b);
+            else
+                ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
+            ctx.stroke();
+            break;
+        }
+
+        ctx.lineTo(obiektyOptyczne[min_id].wspx, obiektyOptyczne[min_id].P);
+        xo = obiektyOptyczne[min_id].wspx;
+
+        b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
+        y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
+
+        a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo);
+        b = y_pomo-a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
+
     }
 }
 
@@ -176,6 +268,80 @@ function rysuj_obiekty(){
         }
 }
 
+function rysujObiektyPomocnicze(){
+    zaladujGrid();
+    zaladujOgniskowe();
+    if(pokazOgniskowe==1)
+    {
+        rysujOgniskowe();
+    }
+    if(pokazGrid==1)
+    {
+        rysujGrid();
+    }
+    return;
+}
+
+function rysujGrid(){
+    let odl=j;
+    ctx.beginPath();
+    while(odl<=SZEROKOSC){
+        ctx.moveTo(odl,WYSOKOSC/2);
+        if(odl%100==0)
+        {
+            ctx.lineWidth=2;
+            ctx.moveTo(odl,WYSOKOSC/2+7.5);
+            ctx.lineTo(odl,WYSOKOSC/2-7.5);
+            ctx.font = "10px Arial";
+            ctx.fillText(`${odl}`,odl,WYSOKOSC/2+7.5+15);
+        }
+        else{
+            ctx.lineWidth=1;
+            ctx.moveTo(odl,WYSOKOSC/2+3.75);
+            ctx.lineTo(odl,WYSOKOSC/2-3.75);
+            ctx.font = "8px Arial";
+            ctx.fillText(`${odl}`,odl,WYSOKOSC/2+7.5+12);
+        }
+        odl+=50;
+    }
+    odl=j;
+    while(odl<=WYSOKOSC){
+        ctx.moveTo(0,odl);
+        if(odl%100==0)
+        {
+            ctx.lineWidth=2;
+            ctx.lineTo(7.5,odl);
+            ctx.font = "10px Arial";
+            ctx.fillText(`${odl}`,7.5+15,odl);
+        }
+        else{
+            ctx.lineWidth=1;
+            ctx.lineTo(3.75,odl);
+            ctx.font = "8px Arial";
+            ctx.fillText(`${odl}`,3.75+12,odl);
+        }
+        odl+=50;
+    }
+    ctx.stroke();
+}
+
+function rysujOgniskowe(){
+    zaladujOs();
+    ctx.beginPath();
+    ctx.lineWidth=3;
+    ctx.font = "15px Arial bold";
+    for(let i=0;i<os_Optyczna.length;i++){
+        if(os_Optyczna[i].typ=="PromS") continue;
+        ctx.moveTo(os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2-10);
+        ctx.lineTo(os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2+10);
+        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2+10+25);
+        ctx.moveTo(os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2-10);
+        ctx.lineTo(os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2+10);
+        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2+10+25);
+    }
+    ctx.stroke();
+}
+
 /// Funkcje obsługi wstążek
 
 function wyswietlWstazke(wstazka){
@@ -224,8 +390,67 @@ function zaladujSymulacje(){
     {
         dodajPrzycisk(i);
     }
+
+    if(pokazGrid==0)
+    {
+        document.getElementById('pokaz-grid').innerText="Pokaż siatkę";
+    }
+    else if(pokazGrid==1)
+    {
+        document.getElementById('pokaz-grid').innerText="Schowaj siatkę";
+    }
+    zaladujOgniskowe();
+    if(pokazOgniskowe==0)
+    {
+        document.getElementById('pokaz-ogniskowe').innerText="Pokaż ogniskowe";
+    }
+    else if(pokazOgniskowe==1)
+    {
+        document.getElementById('pokaz-ogniskowe').innerText="Schowaj ogniskowe";
+    }
+
     document.getElementById('wyczysc').addEventListener('click', function(){
         wyczysc();
+    });
+
+    document.getElementById('pokaz-ogniskowe').addEventListener('click', function(){
+        zaladujOgniskowe();
+        if(pokazOgniskowe==1)
+        {
+                document.getElementById('pokaz-ogniskowe').innerText="Pokaż ogniskowe";
+                pokazOgniskowe = 0;
+        }
+        else if(pokazOgniskowe==0)
+        {
+                document.getElementById('pokaz-ogniskowe').innerText="Schowaj ogniskowe";
+                pokazOgniskowe=1;
+        }
+        localStorage.setItem('pokazOgniskowe', pokazOgniskowe);
+        rysuj();
+    });
+
+    document.getElementById('pokaz-grid').addEventListener('click', function(){
+        zaladujGrid();
+        if(pokazGrid==1)
+        {
+            document.getElementById('pokaz-grid').innerText="Pokaż siatkę";
+            pokazGrid = 0;
+        }
+        else if(pokazGrid==0)
+        {
+            document.getElementById('pokaz-grid').innerText="Schowaj siatkę";
+            pokazGrid=1;
+        }
+        localStorage.setItem('pokazGrid', pokazGrid);
+        rysuj();
+    });
+
+    document.getElementById('uruchom').addEventListener('click', function(){
+        uruchomSymulacje();
+    });
+
+    document.getElementById('reset').addEventListener('click', function(){
+        rysuj();
     });
 }
 
