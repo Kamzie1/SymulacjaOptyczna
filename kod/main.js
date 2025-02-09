@@ -9,6 +9,15 @@ let SZEROKOSC = canvas.width=canvas.offsetWidth;
 let j = 50;
 const ctx = canvas.getContext("2d");
 
+canvas.addEventListener("click", (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    sprawdzWspolrzedne(x, y);
+});
+
+
 /// zmienne globalne
 
 const soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
@@ -19,6 +28,8 @@ let wstazka;
 let id_Obiektu=-1;
 let pokazOgniskowe = 0;
 let pokazGrid = 0;
+const margines = 10;
+let N1 = 1;
 
 const kontener = document.getElementById("trescWstazki");
 
@@ -28,26 +39,6 @@ let Tworzenie = `<div class='soczewki'>
                 <div class='zrodla-swiatla'>
                     <button class='promien-swietlny' id='promien-swietlny'>Promień Świetlny</button>
                 </div>`;
-
-let Symulacja = `<div class="sterowanie" id="sterowanie">
-                    <button class="uruchom" id="uruchom">Uruchom</button> 
-                    <button class="reset" id="reset">Reset</button> 
-                    <button class="wyszysc" id="wyczysc">Wyczyść</button>
-                </div>
-                <div class="pokazywanie">
-                    <button class="pokaz-ogniskowe" id="pokaz-ogniskowe"> </button>
-                    <button class="pokaz-grid" id="pokaz-grid">  </button>
-                </div>
-                <div class="material">
-                    <form>
-                        <label for="N1">N1:</label>
-                        <input type="text" id="N1" placeholder="podaj N1:" value="1">
-                    </form>
-                </div>
-                <div class="lista-obiektow" id="lista-obiektow">
-
-                </div>
-                `;
 
 /// Główna pętla
 
@@ -59,6 +50,10 @@ function rysuj(){
     rysuj_os();
     rysuj_obiekty();
     rysujObiektyPomocnicze();
+    zaladujAktualneId();
+    if(id_Obiektu!=-1){
+        //rysujElementyKontrolne(id_Obiektu);
+    }
 }
 
 /// Funkcje odświeżania
@@ -143,6 +138,13 @@ function zaladujGrid(){
     }
 }
 
+function zaladujN1(){
+    if(localStorage.getItem('N1'))
+    {
+            N1 = localStorage.getItem('N1');
+    }
+}
+
 /// Funckje symulacji
 
 function filterOptyki(object){
@@ -198,12 +200,29 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
         }
 
         if(min_id==-1){
-            if(a<0)
-                ctx.lineTo(-b/a,0);
-            else if(a==0)
-                ctx.lineTo(SZEROKOSC, b);
-            else
-                ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
+            if(alfa==90){
+                ctx.lineTo(xo, 0);
+            }
+            else if(alfa==270){
+                ctx.lineTo(xo, WYSOKOSC);
+            }
+            else if(alfa<90||alfa>270)
+            {
+                if(a<0)
+                    ctx.lineTo(-b/a,0);
+                else if(a==0)
+                    ctx.lineTo(SZEROKOSC, b);
+                else
+                    ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
+            }
+            else{
+                if(a>0)
+                    ctx.lineTo(-b/a,0);
+                else if(a==0)
+                    ctx.lineTo(0, b);
+                else
+                    ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
+            }
             ctx.stroke();
             break;
         }
@@ -227,7 +246,14 @@ function rysuj_soczS(id){
     ctx.beginPath();
     ctx.lineWidth=2;
     ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h);
+    ctx.lineTo(os_Optyczna[id].wspx-10,WYSOKOSC/2-os_Optyczna[id].h+10)
+    ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h);
+    ctx.lineTo(os_Optyczna[id].wspx+10,WYSOKOSC/2-os_Optyczna[id].h+10)
+    ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h)
     ctx.lineTo(os_Optyczna[id].wspx, WYSOKOSC/2+ os_Optyczna[id].h);
+    ctx.lineTo(os_Optyczna[id].wspx-10,WYSOKOSC/2+os_Optyczna[id].h-10)
+    ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2+os_Optyczna[id].h);
+    ctx.lineTo(os_Optyczna[id].wspx+10,WYSOKOSC/2+os_Optyczna[id].h-10)
     ctx.stroke();
 }
 
@@ -342,6 +368,29 @@ function rysujOgniskowe(){
     ctx.stroke();
 }
 
+function rysujElementyKontrolne(id){
+    zaladujOs();
+    if(os_Optyczna[id].typ=="PromS"){
+        rysujElementyKontrolnePromienia(id);
+    }
+    else{
+        rysujElementyKontrolneSoczewki(id);
+    }
+}
+
+function rysujElementyKontrolnePromienia(id){
+
+}
+
+function rysujElementyKontrolneSoczewki(id){
+    let wsp = os_Optyczna[id].wspx;
+    ctx.beginPath();
+    ctx.lineWidth=3;
+    ctx.arc(wsp+30, WYSOKOSC/2-30, 10, 0, 360);
+    ctx.fill();
+    ctx.stroke();
+}
+
 /// Funkcje obsługi wstążek
 
 function wyswietlWstazke(wstazka){
@@ -383,6 +432,26 @@ function dodawanieEventListener(){
 /// Funckje obsługi Symulacji
 
 function zaladujSymulacje(){
+    zaladujN1();
+    let Symulacja = `<div class="sterowanie" id="sterowanie">
+    <button class="uruchom" id="uruchom">Uruchom</button> 
+    <button class="reset" id="reset">Reset</button> 
+    <button class="wyszysc" id="wyczysc">Wyczyść</button>
+</div>
+<div class="pokazywanie">
+    <button class="pokaz-ogniskowe" id="pokaz-ogniskowe"> </button>
+    <button class="pokaz-grid" id="pokaz-grid">  </button>
+</div>
+<div class="material">
+    <form>
+        <label for="N1">N1:</label>
+        <input type="text" id="N1" placeholder="podaj N1:" value="${N1}">
+    </form>
+</div>
+<div class="lista-obiektow" id="lista-obiektow">
+
+</div>
+    `;
     kontener.innerHTML=Symulacja;
     document.getElementById('lista-obiektow').innerHTML='';
     zaladujOs();
@@ -451,6 +520,10 @@ function zaladujSymulacje(){
 
     document.getElementById('reset').addEventListener('click', function(){
         rysuj();
+    });
+
+    document.getElementById('N1').addEventListener('input', function(){
+        localStorage.setItem('N1', parseFloat(this.value) || 0);
     });
 }
 
@@ -563,6 +636,7 @@ function zaladujWlasciwosciSoczewki(id){
                                 <label for='F'>F: </label>
                                 <input type='text'' id='F' placeholder='podaj F:' value=${os_Optyczna[id].F}>
                             </form>
+                            <button class="F-zaawansowane" id="F-zaawansowane"> Zaawansowane </button>
                         </div>
                         <div class='dod_przyciski' id='dod_przyciski'>
                             <button class="usun" id="usun">Usuń</button>
@@ -629,6 +703,9 @@ function EventSoczS(id){
         rysuj();
     });
 
+    document.getElementById('F-zaawansowane').addEventListener("click", function(){
+        document.getElementById('okno-zaawansowane').style.display = "block";
+    });
 }
 
 function EventPromS(id){
@@ -669,6 +746,67 @@ function EventPromS(id){
         rysuj();
     });
 }
+
+document.getElementById('zamknij').addEventListener('click', function(){
+    zaladujAktualneId();
+    zaladujN1();
+    let R1 = parseFloat(document.getElementById('R1').value) || 0;
+    let R2 = parseFloat(document.getElementById('R2').value) || 0;
+    let Ns = parseFloat(document.getElementById('Ns').value) || 0;
+    os_Optyczna[id_Obiektu].F = 1/(((1/R1)+(1/R2))*((Ns/N1)-1));
+    localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+    document.getElementById('okno-zaawansowane').style.display = "none";
+    location.reload();
+});
+
+// Klikanie
+
+function sprawdzWspolrzedne(x, y){
+    let cosZadzialo = 0;
+    zaladujOs();
+    zaladujAktualneId();
+    for(let i=0;i<os_Optyczna.length;i++){
+        if(czykliknal(x, y, i)){
+            wyswietlWlasciwosci(i);
+            //rysujElementyKontrolne(i);
+            localStorage.setItem('id_Obiektu', i);
+            cosZadzialo=1;
+            break;
+        }
+    }
+
+    if(cosZadzialo==0){
+            localStorage.setItem('id_Obiektu', -1);
+            wstazka = "SYMULACJA";
+            localStorage.setItem('wstazka', wstazka);
+            document.getElementById('Opcja-symulacji').style.boxShadow = "0px 0px 2px 0px black inset";
+            document.getElementById('Opcja-tworzenia').style.boxShadow = "";
+            zaladujSymulacje();
+            location.reload();
+    }
+}
+
+function czykliknal(x, y, i){
+    if(os_Optyczna[i].typ=="PromS"){
+        return czykliknalPromien(x, y, i);
+    }
+    else{
+        return czykliknalSoczewke(x, y, i);
+    }
+}
+
+function czykliknalSoczewke(x, y, i){
+    if(os_Optyczna[i].wspx-x<-1*margines||os_Optyczna[i].wspx-x>margines)   return false;
+    if(y>os_Optyczna[i].h+WYSOKOSC/2+margines||y<-1*os_Optyczna[i].h+WYSOKOSC/2-margines)   return false;
+    return true;
+}
+
+function czykliknalPromien(x, y, i){
+    if(os_Optyczna[i].wspx-x<-1*margines||os_Optyczna[i].wspx-x>margines)   return false;
+    if(os_Optyczna[i].wspy-y<-1*margines||os_Optyczna[i].wspy-y>margines)   return false;
+    return true;
+}
+
 
 ///
 
