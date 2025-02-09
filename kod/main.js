@@ -34,10 +34,16 @@ let N1 = 1;
 const kontener = document.getElementById("trescWstazki");
 
 let Tworzenie = `<div class='soczewki'>
-                    <button class='skupiajaca' id='skupiajaca'>Skupiająca</button>
+                    <div class="kontener-przyciskow">
+                        <button class='skupiajaca' id='skupiajaca'><img height=100% width=100% src="img/skupiajaca.png"><span>Skupiająca</span></button>
+                    </div>
+                    <span>Soczewki</span>
                 </div>
                 <div class='zrodla-swiatla'>
-                    <button class='promien-swietlny' id='promien-swietlny'>Promień Świetlny</button>
+                    <div class="kontener-przyciskow">
+                        <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span>Promień</span></button>
+                    </div>
+                    <span>Żródła światła</span>
                 </div>`;
 
 /// Główna pętla
@@ -74,6 +80,7 @@ function usunLocalStorage(){
         localStorage.removeItem('id_Obiektu');
         localStorage.removeItem('pokazOgniskowe');
         localStorage.removeItem('pokazGrid');
+        localStorage.removeItem('N1');
         sessionStorage.setItem("sessionVisit", "true");
         location.reload();
     } 
@@ -434,24 +441,31 @@ function dodawanieEventListener(){
 function zaladujSymulacje(){
     zaladujN1();
     let Symulacja = `<div class="sterowanie" id="sterowanie">
-    <button class="uruchom" id="uruchom">Uruchom</button> 
-    <button class="reset" id="reset">Reset</button> 
-    <button class="wyszysc" id="wyczysc">Wyczyść</button>
-</div>
-<div class="pokazywanie">
-    <button class="pokaz-ogniskowe" id="pokaz-ogniskowe"> </button>
-    <button class="pokaz-grid" id="pokaz-grid">  </button>
-</div>
-<div class="material">
-    <form>
-        <label for="N1">N1:</label>
-        <input type="text" id="N1" placeholder="podaj N1:" value="${N1}">
-    </form>
-</div>
-<div class="lista-obiektow" id="lista-obiektow">
+                        <div class="kontener-przyciskow">
+                            <button class="uruchom" id="uruchom"> <img src="img/uruchom.png" width="100%" height="100%"> <span class="span-przycisk">Uruchom</span></button> 
+                            <button class="reset" id="reset"><img src="img/reset.png" width="100%" height="100%"> <span  class="span-przycisk">Reset</span></button> 
+                            <button class="wyczysc" id="wyczysc"><img src="img/wyczysc.png" width="100%" height="100%"> <span  class="span-przycisk">Wyczyść</span></button>
+                        </div>
+                        <span>Sterowanie</span>
+                    </div>
+                    <div class="pokazywanie">
+                         <div class="kontener-przyciskow">
+                            <button class="pokaz-ogniskowe" id="pokaz-ogniskowe"> <img id="pokaz-ogniskowe-img" src="img/pokaz-ogniskowe.png" width="100%" height="100%"> <span  class="span-przycisk" id="pokaz-ogniskowe-span"></span></button>
+                            <button class="pokaz-grid" id="pokaz-grid">  <img id="pokaz-grid-img" src="img/pokaz-grid.png" width="100%" height="100%"> <span  class="span-przycisk" id="pokaz-grid-span"></span></button>
+                        </div>
+                        <span>Widok</span>
+                    </div>
+                    <div class="material">
+                        <form class="osrodek">
+                            <label for="N1">N1:</label>
+                            <input type="text" id="N1" placeholder="podaj N1:" value="${N1}">
+                        </form>
+                        <span>Ośrodek</span>
+                    </div>
+                    <div class="lista-obiektow" id="lista-obiektow">
 
-</div>
-    `;
+                    </div>`;
+
     kontener.innerHTML=Symulacja;
     document.getElementById('lista-obiektow').innerHTML='';
     zaladujOs();
@@ -460,22 +474,26 @@ function zaladujSymulacje(){
         dodajPrzycisk(i);
     }
 
-    if(pokazGrid==0)
+    if(pokazGrid==1)
     {
-        document.getElementById('pokaz-grid').innerText="Pokaż siatkę";
+        document.getElementById('pokaz-grid-img').src = "img/schowaj-grid.png";
+        document.getElementById('pokaz-grid-span').innerText = "Schowaj siatkę";
     }
-    else if(pokazGrid==1)
+    else if(pokazGrid==0)
     {
-        document.getElementById('pokaz-grid').innerText="Schowaj siatkę";
+        document.getElementById('pokaz-grid-img').src = "img/pokaz-grid.png";
+        document.getElementById('pokaz-grid-span').innerText = "Pokaż siatkę";
     }
     zaladujOgniskowe();
-    if(pokazOgniskowe==0)
+    if(pokazOgniskowe==1)
     {
-        document.getElementById('pokaz-ogniskowe').innerText="Pokaż ogniskowe";
+        document.getElementById('pokaz-ogniskowe-img').src = "img/schowaj-ogniskowe.png";
+        document.getElementById('pokaz-ogniskowe-span').innerText = "Schowaj ogniskowe";
     }
-    else if(pokazOgniskowe==1)
+    else if(pokazOgniskowe==0)
     {
-        document.getElementById('pokaz-ogniskowe').innerText="Schowaj ogniskowe";
+        document.getElementById('pokaz-ogniskowe-img').src = "img/pokaz-ogniskowe.png";
+        document.getElementById('pokaz-ogniskowe-span').innerText = "Pokaż ogniskowe";
     }
 
     document.getElementById('wyczysc').addEventListener('click', function(){
@@ -486,12 +504,14 @@ function zaladujSymulacje(){
         zaladujOgniskowe();
         if(pokazOgniskowe==1)
         {
-                document.getElementById('pokaz-ogniskowe').innerText="Pokaż ogniskowe";
-                pokazOgniskowe = 0;
+            document.getElementById('pokaz-ogniskowe-img').src = "img/pokaz-ogniskowe.png";
+            document.getElementById('pokaz-ogniskowe-span').innerText = "Pokaż ogniskowe";
+            pokazOgniskowe = 0;
         }
         else if(pokazOgniskowe==0)
         {
-                document.getElementById('pokaz-ogniskowe').innerText="Schowaj ogniskowe";
+                document.getElementById('pokaz-ogniskowe-img').src = "img/schowaj-ogniskowe.png";
+                document.getElementById('pokaz-ogniskowe-span').innerText = "Schowaj ogniskowe";
                 pokazOgniskowe=1;
         }
         localStorage.setItem('pokazOgniskowe', pokazOgniskowe);
@@ -502,12 +522,14 @@ function zaladujSymulacje(){
         zaladujGrid();
         if(pokazGrid==1)
         {
-            document.getElementById('pokaz-grid').innerText="Pokaż siatkę";
+            document.getElementById('pokaz-grid-img').src = "img/pokaz-grid.png";
+            document.getElementById('pokaz-grid-span').innerText = "Pokaż siatkę";
             pokazGrid = 0;
         }
         else if(pokazGrid==0)
         {
-            document.getElementById('pokaz-grid').innerText="Schowaj siatkę";
+            document.getElementById('pokaz-grid-img').src = "img/schowaj-grid.png";
+            document.getElementById('pokaz-grid-span').innerText = "Schowaj siatkę";
             pokazGrid=1;
         }
         localStorage.setItem('pokazGrid', pokazGrid);
@@ -621,12 +643,22 @@ function zaladujWlasciwosci(id){
 }
 
 function zaladujWlasciwosciSoczewki(id){
-    kontener.innerHTML=`<div class='rys' id='rys'>
+    kontener.innerHTML=`<div class="dane">
+                        <div class="kontener-przyciskow">
+                        <div class='nazwa'>
                             <form>  
                                 <label for='nazwa'>Nazwa: </label>
                                 <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${os_Optyczna[id].nazwa}>
+                            </form>
+                        </div>
+                        <div class="wspx">
+                            <form>
                                 <label for='wspx'>Współrzędne: </label>
                                 <input type='text' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
+                            </form>
+                        </div>
+                        <div class ="h">
+                            <form>
                                 <label for='h'>Wysokość soczewki: </label>
                                 <input type='text' id='h' placeholder='podaj h:' value=${os_Optyczna[id].h}
                             </form>
@@ -636,30 +668,56 @@ function zaladujWlasciwosciSoczewki(id){
                                 <label for='F'>F: </label>
                                 <input type='text'' id='F' placeholder='podaj F:' value=${os_Optyczna[id].F}>
                             </form>
-                            <button class="F-zaawansowane" id="F-zaawansowane"> Zaawansowane </button>
+                        </div>
+                        </div>
+                        <span>Właściwości</span>
                         </div>
                         <div class='dod_przyciski' id='dod_przyciski'>
-                            <button class="usun" id="usun">Usuń</button>
+                            <div class="kontener-przyciskow">
+                                <button class="F-zaawansowane" id="F-zaawansowane"><img height=100% width=100% src="img/zaawansowane.png"><span>Zaawansowane</span></button>
+                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span>Usuń</span></button>
+                            </div>
+                            <span>Zaawansowane</span>
                         </div>`;
     dodawanieEventListener();
     EventSoczS(id);
 }
 
 function zaladujWlasciwosciPromienia(id){
-    kontener.innerHTML=`<div class='rys' id='rys'>
-                            <form>
+    kontener.innerHTML=`<div class="dane">
+                        <div class="kontener-przyciskow">
+                        <div class='nazwa'>
+                            <form>  
                                 <label for='nazwa'>Nazwa: </label>
                                 <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${os_Optyczna[id].nazwa}>
+                            </form>
+                        </div>
+                        <div class="wspx">
+                            <form>
                                 <label for='wspx'>Współrzędne x: </label>
                                 <input type='text' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
+                            </form>
+                        </div>
+                        <div class ="h">
+                            <form>
                                 <label for='wspy'>Współrzędne y: </label>
                                 <input type='text' id='wspy' placeholder='podaj wspy:' value=${os_Optyczna[id].wspy}>
+                            </form>
+                        </div>
+                        <div class='optyka' id='optyka'>
+                            <form>
                                 <label for='alfa'>alfa: </label>
                                 <input type='text'' id='alfa' placeholder='podaj alfa:' value=${os_Optyczna[id].alfa}>
                             </form>
                         </div>
+                        </div>
+                        <span>Właściwości</span>
+                        </div>
                         <div class='dod_przyciski' id='dod_przyciski'>
-                            <button class="usun" id="usun">Usuń</button>
+                            <div class="kontener-przyciskow">
+                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span>Usuń</span></button>
+                            </div>
+                            <span>Usuwanie</span>
                         </div>`;
     dodawanieEventListener();
     EventPromS(id);
@@ -746,6 +804,13 @@ function EventPromS(id){
         rysuj();
     });
 }
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+        document.getElementById('okno-zaawansowane').style.display = "none";
+    }
+});
+
 
 document.getElementById('zamknij').addEventListener('click', function(){
     zaladujAktualneId();
