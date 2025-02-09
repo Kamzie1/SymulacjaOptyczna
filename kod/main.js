@@ -808,6 +808,7 @@ function EventPromS(id){
 document.addEventListener("keydown", function(event) {
     if (event.key === "Escape") {
         document.getElementById('okno-zaawansowane').style.display = "none";
+        this.location.reload();
     }
 });
 
