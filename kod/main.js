@@ -35,13 +35,13 @@ const kontener = document.getElementById("trescWstazki");
 
 let Tworzenie = `<div class='soczewki'>
                     <div class="kontener-przyciskow">
-                        <button class='skupiajaca' id='skupiajaca'><img height=100% width=100% src="img/skupiajaca.png"><span>Skupiająca</span></button>
+                        <button class='skupiajaca' id='skupiajaca'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Skupiająca</span></button>
                     </div>
                     <span>Soczewki</span>
                 </div>
                 <div class='zrodla-swiatla'>
                     <div class="kontener-przyciskow">
-                        <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span>Promień</span></button>
+                        <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Promień</span></button>
                     </div>
                     <span>Żródła światła</span>
                 </div>`;
@@ -170,16 +170,32 @@ function uruchomSymulacje(){
     }
 }
 
-function wZasiegu(wspx, h, P, xo){
-    if(wspx<=xo)    return false;
-    if(WYSOKOSC/2+h<P)  return false;
-    if(WYSOKOSC/2-h>P)  return false;
-    return true;
+function wZasiegu(wspx, h, P, xo, kierunek){
+    if(kierunek==1){
+        if(wspx<=xo)    return false;
+        if(WYSOKOSC/2+h<P)  return false;
+        if(WYSOKOSC/2-h>P)  return false;
+        return true;
+    }
+    else{
+        if(wspx>=xo)    return false;
+        if(WYSOKOSC/2+h<P)  return false;
+        if(WYSOKOSC/2-h>P)  return false;
+        return true;
+    }
 }
 
 function Symuluj(wspx, wspy, alfa, os_Optyczna){
     let obiektyOptyczne = os_Optyczna.filter(filterOptyki);
-    let a, b, xo, yo, y_pomo, b_pomo;
+    let a, b, xo, yo, y_pomo, b_pomo, kierunek;
+
+    if(alfa-alfa/360<=270&&alfa-alfa/360>=90){
+        kierunek=-1;
+    }
+    else{
+        kierunek=1;
+    }
+
     xo = wspx;
     yo = wspy;
 
@@ -196,24 +212,18 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
         for(let i=0;i<obiektyOptyczne.length;i++){
             obiektyOptyczne[i].P = a*obiektyOptyczne[i].wspx + b;
 
-            if(!wZasiegu(obiektyOptyczne[i].wspx, obiektyOptyczne[i].h, obiektyOptyczne[i].P, xo)){
+            if(!wZasiegu(obiektyOptyczne[i].wspx, obiektyOptyczne[i].h, obiektyOptyczne[i].P, xo, kierunek)){
                 continue;
             }
 
-            if(obiektyOptyczne[i].wspx<min){
+            if(Math.abs(xo-obiektyOptyczne[i].wspx)<min){
                 min = obiektyOptyczne[i].wspx;
                 min_id = i;
             }
         }
 
         if(min_id==-1){
-            if(alfa==90){
-                ctx.lineTo(xo, 0);
-            }
-            else if(alfa==270){
-                ctx.lineTo(xo, WYSOKOSC);
-            }
-            else if(alfa<90||alfa>270)
+            if(kierunek==1)
             {
                 if(a<0)
                     ctx.lineTo(-b/a,0);
@@ -237,11 +247,20 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
         ctx.lineTo(obiektyOptyczne[min_id].wspx, obiektyOptyczne[min_id].P);
         xo = obiektyOptyczne[min_id].wspx;
 
-        b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
-        y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
-
-        a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo);
-        b = y_pomo-a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
+        if(kierunek==1){
+            b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
+            y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
+    
+            a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo);
+            b = y_pomo-a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
+        }
+        else{
+            b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
+            y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
+    
+            a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F)-xo);
+            b = y_pomo-a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
+        }
 
     }
 }
@@ -674,8 +693,8 @@ function zaladujWlasciwosciSoczewki(id){
                         </div>
                         <div class='dod_przyciski' id='dod_przyciski'>
                             <div class="kontener-przyciskow">
-                                <button class="F-zaawansowane" id="F-zaawansowane"><img height=100% width=100% src="img/zaawansowane.png"><span>Zaawansowane</span></button>
-                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span>Usuń</span></button>
+                                <button class="F-zaawansowane" id="F-zaawansowane"><img height=100% width=100% src="img/zaawansowane.png"><span class="span-przycisk">Zaawansowane</span></button>
+                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
                             </div>
                             <span>Zaawansowane</span>
                         </div>`;
@@ -706,8 +725,8 @@ function zaladujWlasciwosciPromienia(id){
                         </div>
                         <div class='optyka' id='optyka'>
                             <form>
-                                <label for='alfa'>alfa: </label>
-                                <input type='text'' id='alfa' placeholder='podaj alfa:' value=${os_Optyczna[id].alfa}>
+                                <label for='alfa'>Kąt: </label>
+                                <input type='text'' id='alfa' placeholder='podaj kąt:' value=${os_Optyczna[id].alfa}>
                             </form>
                         </div>
                         </div>
@@ -715,7 +734,7 @@ function zaladujWlasciwosciPromienia(id){
                         </div>
                         <div class='dod_przyciski' id='dod_przyciski'>
                             <div class="kontener-przyciskow">
-                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span>Usuń</span></button>
+                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
                             </div>
                             <span>Usuwanie</span>
                         </div>`;
