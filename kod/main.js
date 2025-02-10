@@ -187,7 +187,7 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
             }
 
             if(Math.abs(xo-obiektyOptyczne[i].wspx)<min){
-                min = xo-obiektyOptyczne[i].wspx;
+                min = Math.abs(xo-obiektyOptyczne[i].wspx);
                 min_id = i;
                 console.log(min_id);
             }
