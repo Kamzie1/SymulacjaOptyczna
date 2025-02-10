@@ -24,54 +24,35 @@ const soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: 
 const promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
 
 let os_Optyczna;
-let wstazka;
+let wstazka="SYMULACJA";
 let id_Obiektu=-1;
 let pokazOgniskowe = 0;
 let pokazGrid = 0;
-const margines = 10;
 let N1 = 1;
 
+const margines = 10;
 const kontener = document.getElementById("trescWstazki");
-
-let Tworzenie = `<div class='soczewki'>
-                    <div class="kontener-przyciskow">
-                        <button class='skupiajaca' id='skupiajaca'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Skupiająca</span></button>
-                    </div>
-                    <span>Soczewki</span>
-                </div>
-                <div class='zrodla-swiatla'>
-                    <div class="kontener-przyciskow">
-                        <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Promień</span></button>
-                    </div>
-                    <span>Żródła światła</span>
-                </div>`;
 
 /// Główna pętla
 
-rysuj();
+main();
 
-function rysuj(){
+function main(){
+
     usunLocalStorage();
-    ctx.clearRect(0, 0, SZEROKOSC, WYSOKOSC);
-    rysuj_os();
-    rysuj_obiekty();
-    rysujObiektyPomocnicze();
     zaladujAktualneId();
-    if(id_Obiektu!=-1){
-        //rysujElementyKontrolne(id_Obiektu);
-    }
+    zaladujWstazke();
+    zaladujOs();
+    zaladujGrid();
+    zaladujN1();
+    zaladujOgniskowe();
+    wyswietlWstazke(wstazka);
+    dodawanieEventListener();
+
+    rysuj();
 }
 
 /// Funkcje odświeżania
-
-window.onload = function(){
-    usunLocalStorage();
-    zaladujWstazke();
-    zaladujOs();
-    dodawanieEventListener();
-    wyswietlWstazke(wstazka);
-    zaladujGrid();
-}
 
 function usunLocalStorage(){
     if (!sessionStorage.getItem("sessionVisit")) {
@@ -82,7 +63,7 @@ function usunLocalStorage(){
         localStorage.removeItem('pokazGrid');
         localStorage.removeItem('N1');
         sessionStorage.setItem("sessionVisit", "true");
-        location.reload();
+        main();
     } 
 }
 
@@ -100,22 +81,18 @@ function zaladujAktualneId(){
         {
             id_Obiektu = localStorage.getItem('id_Obiektu');
         }
-    else
-        {
-            id_Obiektu=-1;
-        }
 }
 
 function zaladujOs(){
     if(localStorage.getItem('os_Optyczna'))
-        {
+    {
             os_Optyczna = JSON.parse(localStorage.getItem('os_Optyczna'));
-        }
-        else
-        {
-            os_Optyczna =[];
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        }
+    }
+    else
+    {
+        os_Optyczna =[];
+        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+    }
 }
 
 function zaladujWstazke()
@@ -123,11 +100,6 @@ function zaladujWstazke()
     if(localStorage.getItem('wstazka'))
     {
         wstazka = localStorage.getItem('wstazka');
-    }
-    else
-    {
-        wstazka = "SYMULACJA";
-        localStorage.setItem('wstazka', wstazka);
     }
 }
 
@@ -173,23 +145,20 @@ function uruchomSymulacje(){
 function wZasiegu(wspx, h, P, xo, kierunek){
     if(kierunek==1){
         if(wspx<=xo)    return false;
-        if(WYSOKOSC/2+h<P)  return false;
-        if(WYSOKOSC/2-h>P)  return false;
-        return true;
     }
     else{
         if(wspx>=xo)    return false;
-        if(WYSOKOSC/2+h<P)  return false;
-        if(WYSOKOSC/2-h>P)  return false;
-        return true;
     }
+    if(WYSOKOSC/2+h<P)  return false;
+    if(WYSOKOSC/2-h>P)  return false;
+    return true;
 }
 
 function Symuluj(wspx, wspy, alfa, os_Optyczna){
     let obiektyOptyczne = os_Optyczna.filter(filterOptyki);
     let a, b, xo, yo, y_pomo, b_pomo, kierunek;
 
-    if(alfa-alfa/360<=270&&alfa-alfa/360>=90){
+    if(alfa-360*Math.floor(alfa/360)<=270&&alfa-360*Math.floor(alfa/360)>=90){
         kierunek=-1;
     }
     else{
@@ -267,46 +236,68 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
 
 /// Funckje rysowania
 
+function rysuj(){
+    ctx.clearRect(0, 0, SZEROKOSC, WYSOKOSC);
+    
+    rysuj_os();
+    rysuj_obiekty();
+    rysujObiektyPomocnicze();
+
+    if(id_Obiektu!=-1){
+        //rysujElementyKontrolne(id_Obiektu);
+    }
+}
+
 function rysuj_soczS(id){
     if (!os_Optyczna[id]) return;
+
     ctx.beginPath();
     ctx.lineWidth=2;
+
     ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h);
     ctx.lineTo(os_Optyczna[id].wspx-10,WYSOKOSC/2-os_Optyczna[id].h+10)
+
     ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h);
     ctx.lineTo(os_Optyczna[id].wspx+10,WYSOKOSC/2-os_Optyczna[id].h+10)
+
     ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h)
     ctx.lineTo(os_Optyczna[id].wspx, WYSOKOSC/2+ os_Optyczna[id].h);
+
     ctx.lineTo(os_Optyczna[id].wspx-10,WYSOKOSC/2+os_Optyczna[id].h-10)
     ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2+os_Optyczna[id].h);
     ctx.lineTo(os_Optyczna[id].wspx+10,WYSOKOSC/2+os_Optyczna[id].h-10)
+
     ctx.stroke();
 }
 
 function rysuj_promS(id){
+    let dl = 30;
     if (!os_Optyczna[id]) return;
+
     ctx.beginPath();
     ctx.lineWidth=2;
-    let dl = 30;
+
     ctx.moveTo(os_Optyczna[id].wspx, os_Optyczna[id].wspy);
     ctx.arc(os_Optyczna[id].wspx, os_Optyczna[id].wspy, 2, 0, Math.PI * 2, true);
     ctx.fill();
-    ctx.moveTo(os_Optyczna[id].wspx, os_Optyczna[id].wspy);
 
+    ctx.moveTo(os_Optyczna[id].wspx, os_Optyczna[id].wspy);
     ctx.lineTo(os_Optyczna[id].wspx +dl*Math.cos(os_Optyczna[id].alfa*Math.PI/180), os_Optyczna[id].wspy - dl*Math.sin(os_Optyczna[id].alfa*Math.PI/180));
+
     ctx.stroke();
 }
 
 function rysuj_os(){
     ctx.beginPath();
     ctx.lineWidth=3;
+
     ctx.moveTo(0,WYSOKOSC/2);
     ctx.lineTo(SZEROKOSC, WYSOKOSC/2);
+
     ctx.stroke();
 }
 
 function rysuj_obiekty(){
-    zaladujOs();
     for(let i=0;i<os_Optyczna.length; i++)
         {
             if(os_Optyczna[i].typ=='SoczS')
@@ -321,8 +312,6 @@ function rysuj_obiekty(){
 }
 
 function rysujObiektyPomocnicze(){
-    zaladujGrid();
-    zaladujOgniskowe();
     if(pokazOgniskowe==1)
     {
         rysujOgniskowe();
@@ -331,66 +320,94 @@ function rysujObiektyPomocnicze(){
     {
         rysujGrid();
     }
-    return;
 }
 
 function rysujGrid(){
     let odl=j;
+
     ctx.beginPath();
+
+    rysujOsPionowa(odl);
+    rysujOsPozioma(odl);
+
+    ctx.stroke();
+}
+
+function rysujOsPionowa(odl){
     while(odl<=SZEROKOSC){
+
         ctx.moveTo(odl,WYSOKOSC/2);
+
         if(odl%100==0)
         {
             ctx.lineWidth=2;
+
             ctx.moveTo(odl,WYSOKOSC/2+7.5);
             ctx.lineTo(odl,WYSOKOSC/2-7.5);
-            ctx.font = "10px Arial";
+
+            ctx.font = "0.8vw Arial";
             ctx.fillText(`${odl}`,odl,WYSOKOSC/2+7.5+15);
         }
         else{
             ctx.lineWidth=1;
+
             ctx.moveTo(odl,WYSOKOSC/2+3.75);
             ctx.lineTo(odl,WYSOKOSC/2-3.75);
-            ctx.font = "8px Arial";
+
+            ctx.font = "0.6vw Arial";
             ctx.fillText(`${odl}`,odl,WYSOKOSC/2+7.5+12);
         }
+
         odl+=50;
     }
-    odl=j;
+}
+
+function rysujOsPozioma(odl){
     while(odl<=WYSOKOSC){
+
         ctx.moveTo(0,odl);
+
         if(odl%100==0)
         {
             ctx.lineWidth=2;
+
             ctx.lineTo(7.5,odl);
-            ctx.font = "10px Arial";
+
+            ctx.font = "0.8vw Arial";
             ctx.fillText(`${odl}`,7.5+15,odl);
         }
         else{
             ctx.lineWidth=1;
+
             ctx.lineTo(3.75,odl);
-            ctx.font = "8px Arial";
+
+            ctx.font = "0.6vw Arial";
             ctx.fillText(`${odl}`,3.75+12,odl);
         }
         odl+=50;
     }
-    ctx.stroke();
 }
 
 function rysujOgniskowe(){
-    zaladujOs();
     ctx.beginPath();
     ctx.lineWidth=3;
-    ctx.font = "15px Arial bold";
+    ctx.font = "1.5vw Arial bold";
+
     for(let i=0;i<os_Optyczna.length;i++){
+
         if(os_Optyczna[i].typ=="PromS") continue;
+
         ctx.moveTo(os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2-10);
         ctx.lineTo(os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2+10);
-        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2+10+25);
+
+        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2+10+50);
+
         ctx.moveTo(os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2-10);
         ctx.lineTo(os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2+10);
-        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2+10+25);
+
+        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2+10+50);
     }
+
     ctx.stroke();
 }
 
@@ -420,7 +437,6 @@ function rysujElementyKontrolneSoczewki(id){
 /// Funkcje obsługi wstążek
 
 function wyswietlWstazke(wstazka){
-    zaladujAktualneId();
     if(id_Obiektu!=-1){
         zaladujWstazkeWlasciwosci();
     }
@@ -453,106 +469,143 @@ function dodawanieEventListener(){
         localStorage.setItem('wstazka', wstazka);
         wyswietlWstazke(wstazka);
     });
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") {
+            document.getElementById('okno-zaawansowane').style.display = "none";
+            main();
+        }
+    });
+    
+    
+    document.getElementById('zamknij').addEventListener('click', function(){
+        zaladujAktualneId();
+        zaladujN1();
+        zaladujOs();
+        let R1, R2, Ns;
+
+        if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('R1').value) || 0 ,  "R")){
+            R1 = document.getElementById('R1').value || 0;
+        }
+        else{
+            return;
+        }
+
+        if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('R2').value) || 0 ,  "R")){
+            R2 = document.getElementById('R2').value || 0;
+        }
+        else{
+            return;
+        }
+
+        if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('Ns').value) || 0 ,  "N")){
+            Ns = document.getElementById('Ns').value || 0;
+        }
+        else{
+            return;
+        }
+
+        if(Ns==N1)  return;
+        if(R1==-R2) return;   
+
+        if(sprawdzZgodnoscDanych(1/(((1/R1)+(1/R2))*((Ns/N1)-1)), "F")){
+            os_Optyczna[id_Obiektu].F = 1/(((1/R1)+(1/R2))*((Ns/N1)-1));
+        }
+        else{
+            return;
+        }
+
+        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+        document.getElementById('okno-zaawansowane').style.display = "none";
+        main();
+    });
 }
 
 /// Funckje obsługi Symulacji
 
 function zaladujSymulacje(){
-    zaladujN1();
+
+    wypelnijSymulacje();
+    
+    wypelnijListeObiektow();
+
+    obsluzElementyPomocnicze();
+
+    dodajEventSymulacji();
+}
+
+function wypelnijSymulacje(){
     let Symulacja = `<div class="sterowanie" id="sterowanie">
-                        <div class="kontener-przyciskow">
-                            <button class="uruchom" id="uruchom"> <img src="img/uruchom.png" width="100%" height="100%"> <span class="span-przycisk">Uruchom</span></button> 
-                            <button class="reset" id="reset"><img src="img/reset.png" width="100%" height="100%"> <span  class="span-przycisk">Reset</span></button> 
-                            <button class="wyczysc" id="wyczysc"><img src="img/wyczysc.png" width="100%" height="100%"> <span  class="span-przycisk">Wyczyść</span></button>
-                        </div>
-                        <span>Sterowanie</span>
-                    </div>
-                    <div class="pokazywanie">
-                         <div class="kontener-przyciskow">
-                            <button class="pokaz-ogniskowe" id="pokaz-ogniskowe"> <img id="pokaz-ogniskowe-img" src="img/pokaz-ogniskowe.png" width="100%" height="100%"> <span  class="span-przycisk" id="pokaz-ogniskowe-span"></span></button>
-                            <button class="pokaz-grid" id="pokaz-grid">  <img id="pokaz-grid-img" src="img/pokaz-grid.png" width="100%" height="100%"> <span  class="span-przycisk" id="pokaz-grid-span"></span></button>
-                        </div>
-                        <span>Widok</span>
-                    </div>
-                    <div class="material">
-                        <form class="osrodek">
-                            <label for="N1">N1:</label>
-                            <input type="text" id="N1" placeholder="podaj N1:" value="${N1}">
-                        </form>
-                        <span>Ośrodek</span>
-                    </div>
-                    <div class="lista-obiektow" id="lista-obiektow">
+    <div class="kontener-przyciskow">
+        <button class="uruchom" id="uruchom"> <img src="img/uruchom.png" width="100%" height="100%"> <span class="span-przycisk">Uruchom</span></button> 
+        <button class="reset" id="reset"><img src="img/reset.png" width="100%" height="100%"> <span  class="span-przycisk">Reset</span></button> 
+        <button class="wyczysc" id="wyczysc"><img src="img/wyczysc.png" width="100%" height="100%"> <span  class="span-przycisk">Wyczyść</span></button>
+    </div>
+    <span>Sterowanie</span>
+</div>
+<div class="pokazywanie">
+     <div class="kontener-przyciskow">
+        <button class="pokaz-ogniskowe" id="pokaz-ogniskowe"> <img id="pokaz-ogniskowe-img" src="img/pokaz-ogniskowe.png" width="100%" height="100%"> <span  class="span-przycisk" id="pokaz-ogniskowe-span"></span></button>
+        <button class="pokaz-grid" id="pokaz-grid">  <img id="pokaz-grid-img" src="img/pokaz-grid.png" width="100%" height="100%"> <span  class="span-przycisk" id="pokaz-grid-span"></span></button>
+    </div>
+    <span>Widok</span>
+</div>
+<div class="material">
+    <form class="osrodek">
+        <label for="N1">N1:</label>
+        <input type="text" id="N1" placeholder="podaj N1:" value="${N1}">
+    </form>
+    <span>Ośrodek</span>
+</div>
+<div class="lista-obiektow" id="lista-obiektow">
 
-                    </div>`;
-
+        </div>`;
     kontener.innerHTML=Symulacja;
+}
+
+function wypelnijListeObiektow(){
     document.getElementById('lista-obiektow').innerHTML='';
-    zaladujOs();
     for(let i=0;i<os_Optyczna.length;i++)
     {
         dodajPrzycisk(i);
     }
+}
 
+function obsluzElementyPomocnicze(){
+        
     if(pokazGrid==1)
-    {
-        document.getElementById('pokaz-grid-img').src = "img/schowaj-grid.png";
-        document.getElementById('pokaz-grid-span').innerText = "Schowaj siatkę";
-    }
-    else if(pokazGrid==0)
-    {
-        document.getElementById('pokaz-grid-img').src = "img/pokaz-grid.png";
-        document.getElementById('pokaz-grid-span').innerText = "Pokaż siatkę";
-    }
-    zaladujOgniskowe();
-    if(pokazOgniskowe==1)
-    {
-        document.getElementById('pokaz-ogniskowe-img').src = "img/schowaj-ogniskowe.png";
-        document.getElementById('pokaz-ogniskowe-span').innerText = "Schowaj ogniskowe";
-    }
-    else if(pokazOgniskowe==0)
-    {
-        document.getElementById('pokaz-ogniskowe-img').src = "img/pokaz-ogniskowe.png";
-        document.getElementById('pokaz-ogniskowe-span').innerText = "Pokaż ogniskowe";
-    }
+        {
+            document.getElementById('pokaz-grid-img').src = "img/schowaj-grid.png";
+            document.getElementById('pokaz-grid-span').innerText = "Schowaj siatkę";
+        }
+        else if(pokazGrid==0)
+        {
+            document.getElementById('pokaz-grid-img').src = "img/pokaz-grid.png";
+            document.getElementById('pokaz-grid-span').innerText = "Pokaż siatkę";
+        }
+        if(pokazOgniskowe==1)
+        {
+            document.getElementById('pokaz-ogniskowe-img').src = "img/schowaj-ogniskowe.png";
+            document.getElementById('pokaz-ogniskowe-span').innerText = "Schowaj ogniskowe";
+        }
+        else if(pokazOgniskowe==0)
+        {
+            document.getElementById('pokaz-ogniskowe-img').src = "img/pokaz-ogniskowe.png";
+            document.getElementById('pokaz-ogniskowe-span').innerText = "Pokaż ogniskowe";
+        }
+}
 
+function dodajEventSymulacji(){
     document.getElementById('wyczysc').addEventListener('click', function(){
         wyczysc();
     });
 
     document.getElementById('pokaz-ogniskowe').addEventListener('click', function(){
-        zaladujOgniskowe();
-        if(pokazOgniskowe==1)
-        {
-            document.getElementById('pokaz-ogniskowe-img').src = "img/pokaz-ogniskowe.png";
-            document.getElementById('pokaz-ogniskowe-span').innerText = "Pokaż ogniskowe";
-            pokazOgniskowe = 0;
-        }
-        else if(pokazOgniskowe==0)
-        {
-                document.getElementById('pokaz-ogniskowe-img').src = "img/schowaj-ogniskowe.png";
-                document.getElementById('pokaz-ogniskowe-span').innerText = "Schowaj ogniskowe";
-                pokazOgniskowe=1;
-        }
-        localStorage.setItem('pokazOgniskowe', pokazOgniskowe);
-        rysuj();
+        obsluzOgniskowe();
     });
 
     document.getElementById('pokaz-grid').addEventListener('click', function(){
-        zaladujGrid();
-        if(pokazGrid==1)
-        {
-            document.getElementById('pokaz-grid-img').src = "img/pokaz-grid.png";
-            document.getElementById('pokaz-grid-span').innerText = "Pokaż siatkę";
-            pokazGrid = 0;
-        }
-        else if(pokazGrid==0)
-        {
-            document.getElementById('pokaz-grid-img').src = "img/schowaj-grid.png";
-            document.getElementById('pokaz-grid-span').innerText = "Schowaj siatkę";
-            pokazGrid=1;
-        }
-        localStorage.setItem('pokazGrid', pokazGrid);
-        rysuj();
+        obsluzGrid();
     });
 
     document.getElementById('uruchom').addEventListener('click', function(){
@@ -568,12 +621,46 @@ function zaladujSymulacje(){
     });
 }
 
+function obsluzOgniskowe(){
+    if(pokazOgniskowe==1)
+        {
+            document.getElementById('pokaz-ogniskowe-img').src = "img/pokaz-ogniskowe.png";
+            document.getElementById('pokaz-ogniskowe-span').innerText = "Pokaż ogniskowe";
+            pokazOgniskowe = 0;
+        }
+        else if(pokazOgniskowe==0)
+        {
+                document.getElementById('pokaz-ogniskowe-img').src = "img/schowaj-ogniskowe.png";
+                document.getElementById('pokaz-ogniskowe-span').innerText = "Schowaj ogniskowe";
+                pokazOgniskowe=1;
+        }
+        localStorage.setItem('pokazOgniskowe', pokazOgniskowe);
+        rysuj();
+}
+
+function obsluzGrid(){
+    if(pokazGrid==1)
+        {
+            document.getElementById('pokaz-grid-img').src = "img/pokaz-grid.png";
+            document.getElementById('pokaz-grid-span').innerText = "Pokaż siatkę";
+            pokazGrid = 0;
+        }
+        else if(pokazGrid==0)
+        {
+            document.getElementById('pokaz-grid-img').src = "img/schowaj-grid.png";
+            document.getElementById('pokaz-grid-span').innerText = "Schowaj siatkę";
+            pokazGrid=1;
+        }
+        localStorage.setItem('pokazGrid', pokazGrid);
+        rysuj();
+}
+
 function wyczysc(){
     os_Optyczna=[];
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
     localStorage.setItem('id_Obiektu', -1);
-    location.reload();
-    rysuj();
+    usunWstazkeWlasciwosci();
+    main();
 }
 
 function dodajPrzycisk(id){
@@ -591,7 +678,29 @@ function dodajPrzycisk(id){
 /// Funkcje obsługi Tworzenia
 
 function zaladujTworzenie(){
+
+    wypelnijTworzenie();
+
+    dodajEventTworzenia();
+}
+
+function wypelnijTworzenie(){
+    let Tworzenie = `<div class='soczewki'>
+                    <div class="kontener-przyciskow">
+                        <button class='skupiajaca' id='skupiajaca'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Skupiająca</span></button>
+                    </div>
+                    <span>Soczewki</span>
+                </div>
+                <div class='zrodla-swiatla'>
+                    <div class="kontener-przyciskow">
+                        <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Promień</span></button>
+                    </div>
+                    <span>Żródła światła</span>
+                </div>`;
     kontener.innerHTML= Tworzenie;
+}
+
+function dodajEventTworzenia(){
     document.getElementById('skupiajaca').addEventListener('click', function(){
         zaktualizujOs(soczewkaSkupiajaca);
     });
@@ -616,22 +725,32 @@ function zaktualizujOs(obiekt){
 function zaladujWstazkeWlasciwosci(){
     if(!document.getElementById('Opcja-wlasciwosci'))
     {
-        const wlasciwosci = document.createElement("div");
-        wlasciwosci.className = "Opcja-wlasciwosci";
-        wlasciwosci.id = "Opcja-wlasciwosci";
-        const p = document.createElement("p");
-        const tekst = document.createTextNode("WŁAŚCIWOŚCI");
-        p.appendChild(tekst);
-        wlasciwosci.appendChild(p);
-        document.getElementById('pasek_rodzaji').appendChild(wlasciwosci);
-        document.getElementById('Opcja-symulacji').style.boxShadow = "";
-        document.getElementById('Opcja-tworzenia').style.boxShadow = "";
-
-        document.getElementById('Opcja-wlasciwosci').addEventListener('click', function() {
-            zaladujAktualneId();
-            wyswietlWlasciwosci(id_Obiektu);
-        });
+        tworzWstazkeWlasciwosci();
+        dodajEventWstazkiWlasciwosci();
     }
+}
+
+function tworzWstazkeWlasciwosci(){
+    const wlasciwosci = document.createElement("div");
+    wlasciwosci.className = "Opcja-wlasciwosci";
+    wlasciwosci.id = "Opcja-wlasciwosci";
+
+    const p = document.createElement("p");
+    const tekst = document.createTextNode("WŁAŚCIWOŚCI");
+
+    p.appendChild(tekst);
+    wlasciwosci.appendChild(p);
+    document.getElementById('pasek_rodzaji').appendChild(wlasciwosci);
+
+    document.getElementById('Opcja-symulacji').style.boxShadow = "";
+    document.getElementById('Opcja-tworzenia').style.boxShadow = "";
+}
+
+function dodajEventWstazkiWlasciwosci(){
+    document.getElementById('Opcja-wlasciwosci').addEventListener('click', function() {
+        zaladujAktualneId();
+        wyswietlWlasciwosci(id_Obiektu);
+    });
 }
 
 function usunWstazkeWlasciwosci(){
@@ -662,6 +781,8 @@ function zaladujWlasciwosci(id){
 }
 
 function zaladujWlasciwosciSoczewki(id){
+    if (!os_Optyczna[id]) return;
+
     kontener.innerHTML=`<div class="dane">
                         <div class="kontener-przyciskow">
                         <div class='nazwa'>
@@ -703,6 +824,8 @@ function zaladujWlasciwosciSoczewki(id){
 }
 
 function zaladujWlasciwosciPromienia(id){
+    if (!os_Optyczna[id]) return;
+
     kontener.innerHTML=`<div class="dane">
                         <div class="kontener-przyciskow">
                         <div class='nazwa'>
@@ -751,19 +874,25 @@ function EventSoczS(id){
     });
 
     document.getElementById('wspx').addEventListener("input", function(){
-        os_Optyczna[id].wspx = parseFloat(this.value) || 0;
+        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "wspx")){
+            os_Optyczna[id].wspx = parseFloat(this.value) || 0;
+        }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         rysuj();
     });
 
     document.getElementById('h').addEventListener("input", function(){
-        os_Optyczna[id].h = parseFloat(this.value) || 0;
+        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "h")){
+            os_Optyczna[id].h = parseFloat(this.value) || 0;
+        }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         rysuj();
     });
 
     document.getElementById('F').addEventListener("input", function(){
-        os_Optyczna[id].F = parseFloat(this.value) || 0;
+        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "F")){
+            os_Optyczna[id].F = parseFloat(this.value) || 0;
+        }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         rysuj();
     });
@@ -794,19 +923,25 @@ function EventPromS(id){
     });
 
     document.getElementById('wspx').addEventListener("input", function(){
-        os_Optyczna[id].wspx = parseFloat(this.value) || 0;
+        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "wspx")){
+            os_Optyczna[id].wspx = parseFloat(this.value) || 0;
+        }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         rysuj();
     });
 
     document.getElementById('wspy').addEventListener("input", function(){
-        os_Optyczna[id].wspy = parseFloat(this.value) || 0;
+        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "wspy")){
+            os_Optyczna[id].wspy = parseFloat(this.value) || 0;
+        }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         rysuj();
     });
 
     document.getElementById('alfa').addEventListener("input", function(){
-        os_Optyczna[id].alfa = parseFloat(this.value) || 0;
+        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "alfa")){
+            os_Optyczna[id].alfa = parseFloat(this.value) || 0;
+        }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         rysuj();
     });
@@ -824,32 +959,27 @@ function EventPromS(id){
     });
 }
 
-document.addEventListener("keydown", function(event) {
-    if (event.key === "Escape") {
-        document.getElementById('okno-zaawansowane').style.display = "none";
-        this.location.reload();
+function sprawdzZgodnoscDanych(x, typ){
+    if(typ!="alfa" && typ!="wspx" && typ!="wspy"){
+        if(x<=0)    return false;
     }
-});
-
-
-document.getElementById('zamknij').addEventListener('click', function(){
-    zaladujAktualneId();
-    zaladujN1();
-    let R1 = parseFloat(document.getElementById('R1').value) || 0;
-    let R2 = parseFloat(document.getElementById('R2').value) || 0;
-    let Ns = parseFloat(document.getElementById('Ns').value) || 0;
-    os_Optyczna[id_Obiektu].F = 1/(((1/R1)+(1/R2))*((Ns/N1)-1));
-    localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-    document.getElementById('okno-zaawansowane').style.display = "none";
-    location.reload();
-});
+    if(typ=="h"){
+        if(x>WYSOKOSC/2)    return false;
+    }
+    if(typ=="wspx"){
+        if(x>SZEROKOSC||x<0)  return false;
+    }
+    if(typ=="wspy"){
+        if(x>WYSOKOSC||x<0)  return false;
+    }
+    if(Number.isNaN(x))  return false;
+    return true;
+}
 
 // Klikanie
 
 function sprawdzWspolrzedne(x, y){
     let cosZadzialo = 0;
-    zaladujOs();
-    zaladujAktualneId();
     for(let i=0;i<os_Optyczna.length;i++){
         if(czykliknal(x, y, i)){
             wyswietlWlasciwosci(i);
@@ -867,7 +997,8 @@ function sprawdzWspolrzedne(x, y){
             document.getElementById('Opcja-symulacji').style.boxShadow = "0px 0px 2px 0px black inset";
             document.getElementById('Opcja-tworzenia').style.boxShadow = "";
             zaladujSymulacje();
-            location.reload();
+            usunWstazkeWlasciwosci();
+            main();
     }
 }
 
@@ -891,7 +1022,6 @@ function czykliknalPromien(x, y, i){
     if(os_Optyczna[i].wspy-y<-1*margines||os_Optyczna[i].wspy-y>margines)   return false;
     return true;
 }
-
 
 ///
 
