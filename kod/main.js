@@ -156,6 +156,7 @@ function wZasiegu(wspx, h, P, xo, kierunek){
 
 function Symuluj(wspx, wspy, alfa, os_Optyczna){
     let obiektyOptyczne = os_Optyczna.filter(filterOptyki);
+    console.log(obiektyOptyczne);
     let a, b, xo, yo, y_pomo, b_pomo, kierunek;
 
     if(alfa-360*Math.floor(alfa/360)<=270&&alfa-360*Math.floor(alfa/360)>=90){
@@ -186,8 +187,9 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
             }
 
             if(Math.abs(xo-obiektyOptyczne[i].wspx)<min){
-                min = obiektyOptyczne[i].wspx;
+                min = xo-obiektyOptyczne[i].wspx;
                 min_id = i;
+                console.log(min_id);
             }
         }
 
@@ -710,13 +712,15 @@ function dodajEventTworzenia(){
     });
 }
 
-function zaktualizujOs(obiekt){
-    obiekt.id = os_Optyczna.length;
-    localStorage.setItem('id_Obiektu', obiekt.id)
-    os_Optyczna.push(obiekt);
+function zaktualizujOs(obiekt) {    
+    let nowyObiekt = { ...obiekt }; // Tworzenie nowego obiektu (płytka kopia)
+    nowyObiekt.id = os_Optyczna.length;
+
+    localStorage.setItem('id_Obiektu', os_Optyczna.length);
+    os_Optyczna.push(nowyObiekt);
 
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-    wyswietlWlasciwosci(os_Optyczna.length-1);
+    wyswietlWlasciwosci(os_Optyczna.length - 1);
     rysuj();
 }
 
@@ -819,7 +823,6 @@ function zaladujWlasciwosciSoczewki(id){
                             </div>
                             <span>Zaawansowane</span>
                         </div>`;
-    dodawanieEventListener();
     EventSoczS(id);
 }
 
@@ -861,12 +864,10 @@ function zaladujWlasciwosciPromienia(id){
                             </div>
                             <span>Usuwanie</span>
                         </div>`;
-    dodawanieEventListener();
     EventPromS(id);
 }
 
 function EventSoczS(id){
-
     document.getElementById('nazwa').addEventListener("input", function(){
         os_Optyczna[id].nazwa = this.value;
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
