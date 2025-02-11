@@ -240,18 +240,15 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
             {
                 if(Math.abs(a)<epsilon)
                     ctx.lineTo(SZEROKOSC, b);
-                else if(a<0)
-                    ctx.lineTo(-b/a,0);
-                else
-                    ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
+                else{
+                    ctx.lineTo(SZEROKOSC+100, a*(SZEROKOSC+100)+b);
+                }
             }
             else{
                 if(Math.abs(a)<epsilon)
                     ctx.lineTo(0, b);
-                else if(a>0)
-                    ctx.lineTo(-b/a,0);
                 else
-                    ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
+                    ctx.lineTo( -100,-a*(-100)+b);
             }
             ctx.stroke();
             break;
