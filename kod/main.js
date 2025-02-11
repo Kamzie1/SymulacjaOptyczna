@@ -965,8 +965,7 @@ function EventSoczS(id){
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         odswiez_os_optyczna();
         localStorage.setItem('id_Obiektu', -1);
-        location.reload();
-        rysuj();
+        main();
     });
 
     document.getElementById('F-zaawansowane').addEventListener("click", function(){
@@ -1014,8 +1013,7 @@ function EventPromS(id){
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         odswiez_os_optyczna();
         localStorage.setItem('id_Obiektu', -1);
-        location.reload();
-        rysuj();
+        main();
     });
 }
 
