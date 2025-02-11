@@ -52,6 +52,7 @@ let pokazOgniskowe = 0;
 let pokazGrid = 0;
 let N1 = 1;
 
+const epsilon = 1e-10;
 const margines = 10;
 const kontener = document.getElementById("trescWstazki");
 
@@ -237,7 +238,7 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
         if(min_id==-1){
             if(kierunek==1)
             {
-                if(a==0)
+                if(Math.abs(a)<epsilon)
                     ctx.lineTo(SZEROKOSC, b);
                 else if(a<0)
                     ctx.lineTo(-b/a,0);
@@ -245,7 +246,7 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
                     ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
             }
             else{
-                if(a==0)
+                if(Math.abs(a)<epsilon)
                     ctx.lineTo(0, b);
                 else if(a>0)
                     ctx.lineTo(-b/a,0);
