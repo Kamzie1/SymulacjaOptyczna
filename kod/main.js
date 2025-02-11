@@ -15,13 +15,35 @@ canvas.addEventListener("click", (event) => {
     const y = event.clientY - rect.top;
     
     sprawdzWspolrzedne(x, y);
+    document.getElementById('okno-zaawansowane').style.display = "none";   
+    
+    document.getElementById('R1').value="";
+    document.getElementById('R2').value="";
+    document.getElementById('Ns').value="";
+
+    main();
 });
+
+function zmianaEkranu() {
+    odswiezWspElementow();
+
+    WYSOKOSC = canvas.height = canvas.offsetHeight;
+    SZEROKOSC = canvas.width = canvas.offsetWidth;
+
+    soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
+    promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
+
+    main();
+}
+
+window.addEventListener("resize", zmianaEkranu);
+window.addEventListener("orientationchange", zmianaEkranu);
 
 
 /// zmienne globalne
 
-const soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
-const promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
+let soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
+let promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
 
 let os_Optyczna;
 let wstazka="SYMULACJA";
@@ -124,6 +146,27 @@ function zaladujN1(){
     }
 }
 
+function odswiezWspElementow(){
+    for(let i=0;i<os_Optyczna.length;i++){
+        if(os_Optyczna[i].typ === "PromS")
+            odswiezPromien(i);
+        else if(os_Optyczna[i].typ === "SoczS")
+            odswiezSoczewke(i);
+    }
+}
+
+function odswiezPromien(id){
+    os_Optyczna[id].wspx = os_Optyczna[id].wspx * (canvas.offsetWidth/SZEROKOSC);
+    os_Optyczna[id].wspy = os_Optyczna[id].wspy * (canvas.offsetHeight/WYSOKOSC);
+    localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
+}
+
+function odswiezSoczewke(id){
+    os_Optyczna[id].wspx = os_Optyczna[id].wspx * (canvas.offsetWidth/SZEROKOSC);
+    os_Optyczna[id].h = os_Optyczna[id].h * (canvas.offsetHeight/WYSOKOSC);
+    localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
+}
+
 /// Funckje symulacji
 
 function filterOptyki(object){
@@ -156,7 +199,6 @@ function wZasiegu(wspx, h, P, xo, kierunek){
 
 function Symuluj(wspx, wspy, alfa, os_Optyczna){
     let obiektyOptyczne = os_Optyczna.filter(filterOptyki);
-    console.log(obiektyOptyczne);
     let a, b, xo, yo, y_pomo, b_pomo, kierunek;
 
     if(alfa-360*Math.floor(alfa/360)<=270&&alfa-360*Math.floor(alfa/360)>=90){
@@ -189,25 +231,24 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
             if(Math.abs(xo-obiektyOptyczne[i].wspx)<min){
                 min = Math.abs(xo-obiektyOptyczne[i].wspx);
                 min_id = i;
-                console.log(min_id);
             }
         }
 
         if(min_id==-1){
             if(kierunek==1)
             {
-                if(a<0)
-                    ctx.lineTo(-b/a,0);
-                else if(a==0)
+                if(a==0)
                     ctx.lineTo(SZEROKOSC, b);
+                else if(a<0)
+                    ctx.lineTo(-b/a,0);
                 else
                     ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
             }
             else{
-                if(a>0)
-                    ctx.lineTo(-b/a,0);
-                else if(a==0)
+                if(a==0)
                     ctx.lineTo(0, b);
+                else if(a>0)
+                    ctx.lineTo(-b/a,0);
                 else
                     ctx.lineTo( (WYSOKOSC-b)/a,WYSOKOSC);
             }
@@ -221,15 +262,25 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
         if(kierunek==1){
             b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
             y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
-    
-            a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo);
+            
+            if((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo!=0)
+                a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo);
+            else{
+                alert("błąd");
+                break;
+            }
             b = y_pomo-a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
         }
         else{
             b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
             y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
-    
-            a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F)-xo);
+            
+            if((obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F)-xo!=0)
+                a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F)-xo);
+            else{
+                alert("błąd");
+                break;
+            }
             b = y_pomo-a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
         }
 
@@ -475,6 +526,11 @@ function dodawanieEventListener(){
     document.addEventListener("keydown", function(event) {
         if (event.key === "Escape") {
             document.getElementById('okno-zaawansowane').style.display = "none";
+
+            document.getElementById('R1').value="";
+            document.getElementById('R2').value="";
+            document.getElementById('Ns').value="";
+
             main();
         }
     });
@@ -519,6 +575,11 @@ function dodawanieEventListener(){
 
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         document.getElementById('okno-zaawansowane').style.display = "none";
+
+        document.getElementById('R1').value="";
+        document.getElementById('R2').value="";
+        document.getElementById('Ns').value="";
+
         main();
     });
 }
@@ -712,8 +773,8 @@ function dodajEventTworzenia(){
     });
 }
 
-function zaktualizujOs(obiekt) {    
-    let nowyObiekt = { ...obiekt }; // Tworzenie nowego obiektu (płytka kopia)
+function zaktualizujOs(obiekt) {  
+    let nowyObiekt = { ...obiekt }; 
     nowyObiekt.id = os_Optyczna.length;
 
     localStorage.setItem('id_Obiektu', os_Optyczna.length);
@@ -973,6 +1034,9 @@ function sprawdzZgodnoscDanych(x, typ){
     if(typ=="wspy"){
         if(x>WYSOKOSC||x<0)  return false;
     }
+    if(typ=="alfa"){
+        if(x-360*Math.floor(x/360)==90||x-360*Math.floor(x/360)==270)   return false;
+    }
     if(Number.isNaN(x))  return false;
     return true;
 }
@@ -999,7 +1063,6 @@ function sprawdzWspolrzedne(x, y){
             document.getElementById('Opcja-tworzenia').style.boxShadow = "";
             zaladujSymulacje();
             usunWstazkeWlasciwosci();
-            main();
     }
 }
 
