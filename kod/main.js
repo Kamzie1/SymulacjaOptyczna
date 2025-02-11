@@ -965,6 +965,7 @@ function EventSoczS(id){
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         odswiez_os_optyczna();
         localStorage.setItem('id_Obiektu', -1);
+        usunWstazkeWlasciwosci();
         main();
     });
 
@@ -1013,6 +1014,7 @@ function EventPromS(id){
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         odswiez_os_optyczna();
         localStorage.setItem('id_Obiektu', -1);
+        usunWstazkeWlasciwosci();
         main();
     });
 }
