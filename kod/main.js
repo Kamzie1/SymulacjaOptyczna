@@ -248,7 +248,7 @@ function Symuluj(wspx, wspy, alfa, os_Optyczna){
                 if(Math.abs(a)<epsilon)
                     ctx.lineTo(0, b);
                 else
-                    ctx.lineTo( -100,-a*(-100)+b);
+                    ctx.lineTo( -100,a*(-100)+b);
             }
             ctx.stroke();
             break;
