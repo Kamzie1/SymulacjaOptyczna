@@ -1,5 +1,7 @@
 /// Canvas
 
+"use strict"
+
 let canvas = document.getElementById('canvas');
 canvas.style.display='block';
 canvas.style.width='100%';
@@ -25,6 +27,7 @@ const epsilon = 1e-10;
 const margines = 10;
 const kontener = document.getElementById("trescWstazki");
 let wpisywanie ="";
+let ifNazwa = 0;
 
 /// Główna pętla
 
@@ -39,7 +42,7 @@ function main(){
     zaladujGrid();
     zaladujN1();
     zaladujOgniskowe();
-    wyswietlWstazke(wstazka);
+    wyswietlWstazke(wstazka, id_Obiektu);
 
     rysuj();
 }
@@ -67,350 +70,217 @@ window.addEventListener("resize", zmianaEkranu);
 window.addEventListener("orientationchange", zmianaEkranu);
 
 document.getElementById('Opcja-symulacji').addEventListener('click', function() {
-    wstazka = "SYMULACJA";
-    localStorage.setItem('wstazka', wstazka);
-    wyswietlWstazke(wstazka);
+    wyswietlWstazke("SYMULACJA");
 });
 
 document.getElementById('Opcja-tworzenia').addEventListener('click', function() {
-    wstazka = "TWORZENIE";
-    localStorage.setItem('wstazka', wstazka);
-    wyswietlWstazke(wstazka);
+    wyswietlWstazke("TWORZENIE");
 });
 
-///esc
+
 document.addEventListener("keydown", function(event) {
-    if (event.key === "Escape") {
-        document.getElementById('okno-zaawansowane').style.display = "none";
+    if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
 
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
+    zaladujIfNazwa();
+    zaladujAktualneId();
+    zaladujWpisywanie();
+    zaladujOs();
+    zaladujWstazke();
 
-        main();
+    const key = event.key;
+    
+    if (key === "'") wpiszNazwe(id_Obiektu);
+    else if (key === "Backspace") usunOstatniaLiterke();
+    else if (key === "Escape") esc();
+    else if (ifNazwa==1) Wpisz(key);
+    else if (key === "Enter") Enter();
+    else if (key === "r") rysuj();
+    else if (key === "Delete") deleteObject(id_Obiektu);
+    else if (key === " " || event.code === "Space") Ogniskowe(wstazka);
+    else if (key === "g") Grid(wstazka);
+    else if (key === "s") zaktualizujOs(soczewkaSkupiajaca);
+    else if (key === "p") zaktualizujOs(promienSwietlny);
+    else if (key>="0" && key <="9" ||key===".") Wpisz(key);
+    else if (key === "o") wybierzObjekt();
+    else if (key === "x") zaktulizujZmienna("wspx", "obiekt", id_Obiektu);
+    else if (key === "h") zaktulizujZmienna("h", "SoczS", id_Obiektu);
+    else if (key === "F") zaktulizujZmienna("F", "SoczS", id_Obiektu);
+    else if (key === "y") zaktulizujZmienna("wspy", "PromS", id_Obiektu);
+    else if (key === "a") zaktulizujZmienna("alfa", "PromS", id_Obiektu);
+    else if (key === "S") wyswietlWstazke("SYMULACJA", id_Obiektu);
+    else if (key === "T") wyswietlWstazke("TWORZENIE", id_Obiektu);
+    else if (key === "W"&&id_Obiektu!=-1) wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
+    else if (key === "z") pokazZaawansowane();
+    else if (key === "q") opuscObiekt();
+    else if (key === "N") zaktulizujZmienna("N1", "N1", id_Obiektu);
+});
+
+function Wpisz(tekst){
+    wpisywanie+=tekst;
+
+    localStorage.setItem('wpisywanie', wpisywanie);
+}
+
+function usunOstatniaLiterke(){
+    wpisywanie = wpisywanie.slice(0, -1); 
+
+    localStorage.setItem('wpsiywanie', wpisywanie);
+
+}
+
+function zaktulizujZmienna(zmienna, typ, id){
+    zaladujOs();
+    zaladujAktualneId();
+    id = id_Obiektu;
+    wpisywanie = parseFloat(wpisywanie) ||0;
+    if(typ === "N1"){
+        if(!sprawdzZgodnoscDanych(wpisywanie, "N")){wyczyscWpisywanie();  return;}
+        localStorage.setItem("N1", wpisywanie);
     }
-});
-//enter
-document.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        if(document.getElementById('okno-zaawansowane').style.display === "none")
+    else if(id==-1){
+        wyczyscWpisywanie();
+        return;
+    }
+    else if(zmienna === "wspx"){
+        if(!sprawdzZgodnoscDanych(wpisywanie, "wspx")){wyczyscWpisywanie();  return;}
+        os_Optyczna[id].wspx = wpisywanie;
+    }
+    else if(typ === "PromS" && os_Optyczna[id].typ === "PromS"){
+        if(zmienna === "wspy"){
+            if(!sprawdzZgodnoscDanych(wpisywanie, "wspy")){wyczyscWpisywanie();  return;}
+            os_Optyczna[id].wspy = wpisywanie;
+        }
+        else if(zmienna === "alfa"){
+            if(!sprawdzZgodnoscDanych(wpisywanie, "alfa")){wyczyscWpisywanie();  return;}
+            os_Optyczna[id].alfa = wpisywanie;
+        }
+    }
+    else if(typ === "SoczS" && os_Optyczna[id].typ === "SoczS"){
+        if(zmienna === "h"){
+            if(!sprawdzZgodnoscDanych(wpisywanie, "h")){wyczyscWpisywanie();  return;}
+            os_Optyczna[id].h = wpisywanie;
+        }
+        else if(zmienna === "F"){
+            if(!sprawdzZgodnoscDanych(wpisywanie, "F")){wyczyscWpisywanie();  return;}
+            os_Optyczna[id].F = wpisywanie;
+        }
+    }
+    localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+    wyczyscWpisywanie();
+    main();
+}
+
+function Ogniskowe(wstazka){
+    if(wstazka === "SYMULACJA"){
+        obsluzOgniskowe();
+    }
+    else{
+        if(pokazOgniskowe==1)
         {
-            uruchomSymulacje();
+            pokazOgniskowe = 0;
         }
-        else{
-            policz();
+        else if(pokazOgniskowe==0)
+        {
+            pokazOgniskowe=1;
         }
+        localStorage.setItem('pokazOgniskowe', pokazOgniskowe);
+        rysuj();
     }
-});
-//r
-document.addEventListener("keydown", function(event) {
-    if (event.key === "r") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
+}
 
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-
-        rysuj();     
+function Grid(wstazka){
+    if(wstazka === "SYMULACJA"){
+        obsluzGrid();
     }
-});
-//delete
-document.addEventListener("keydown", function(event) {
-    if (event.key === "Delete") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
-
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-
-        zaladujAktualneId();
-
-        if(id_Obiektu==-1){
-            localStorage.setItem('wstazka', "SYMULACJA");
-            wyswietlWstazke("SYMULACJA");
-            wyczysc();
+    else{
+        if(pokazGrid==1)
+        {
+            pokazGrid = 0;
         }
-        else{
-            wstazka = "SYMULACJA";
-            localStorage.setItem('wstazka', wstazka);
-            wyswietlWstazke(wstazka);
-            os_Optyczna.splice(id_Obiektu, 1);
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            odswiez_os_optyczna();
-            localStorage.setItem('id_Obiektu', -1);
-            usunWstazkeWlasciwosci();
-            main();
-        }    
-    }
-});
-//space
-document.addEventListener("keydown", function(event) {
-    if (event.key === " " || event.code === "Space"){
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
-
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-
-        if(document.getElementById('pokaz-ogniskowe')){
-            obsluzOgniskowe();
+        else if(pokazGrid==0)
+        {
+            pokazGrid=1;
         }
-        else{
-            if(pokazOgniskowe==1)
-                {
-                        pokazOgniskowe = 0;
-                }
-                else if(pokazOgniskowe==0)
-                {
-                            pokazOgniskowe=1;
-                }
-    
-                localStorage.setItem('pokazOgniskowe', pokazOgniskowe);
-                rysuj();
-        }
+        localStorage.setItem('pokazGrid', pokazGrid);
+        rysuj();
     }
-});
-//g 
-document.addEventListener("keydown", function(event) {
-    if (event.key === "g") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
+}
 
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
+function esc(){
+    ukryjOknoZaawansowane();
+    wyczyscWpisywanie();
+    localStorage.setItem('ifNazwa', 0);
+    main();
+}
 
-        if(document.getElementById('pokaz-grid')){
-            obsluzGrid();
-        }
-        else{
-            if(pokazGrid==1)
-                {
-                    pokazGrid = 0;
-                }
-                else if(pokazGrid==0)
-                {
-                    pokazGrid=1;
-                }
-    
-                localStorage.setItem('pokazGrid', pokazGrid);
-                rysuj();
-        }    
-    }
-});
-//s 
-document.addEventListener("keydown", function(event) {
-    if (event.key === "s") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
+function Enter() {
+    let okno = document.getElementById('okno-zaawansowane');
+    let displayStyle = window.getComputedStyle(okno).display; 
 
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
+    if (displayStyle === "none") {
+        uruchomSymulacje();
+    } else {
+        policz();
+    }
+}
 
-        zaktualizujOs(soczewkaSkupiajaca);
-    }
-});
-//p
-document.addEventListener("keydown", function(event) {
-    if (event.key === "p") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
 
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-        
-        zaktualizujOs(promienSwietlny);
+function deleteObject(id){
+    if(id==-1)  wyczysc();
+    else{
+        usunObject(id);
     }
-});
-//wpisywanie liczb {o}
-document.addEventListener("keydown", function(event) {
-    if(event.key >="0"&&event.key <="9") {
-        zaladujWpisywanie();
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
+}
 
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
+function wybierzObjekt(){
+    wpisywanie = parseFloat(wpisywanie) ||0;
+    if(!sprawdzZgodnoscDanych(wpisywanie, "id"))  {wyczyscWpisywanie(); return;}
+    localStorage.setItem('id_Obiektu', wpisywanie);
+    wyswietlWstazke("WŁAŚCIWOŚCI", wpisywanie);
+    wyczyscWpisywanie();
+}
 
-        wpisywanie+=event.key;
-        localStorage.setItem('wpisywanie', wpisywanie);
-    }
-    else if(event.key ==="o"){
-        zaladujWpisywanie();
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
+function pokazZaawansowane(){
+    let okno = document.getElementById('okno-zaawansowane');
+    let displayStyle = window.getComputedStyle(okno).display; 
 
-        document.getElementById('okno-zaawansowane').style.display = "none";
-
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-        zaladujOs();
-        if(wpisywanie>=os_Optyczna.length)  {
-            wpisywanie="";
-            return;
-        }
-        id_Obiektu=parseInt(wpisywanie, 10);
-        localStorage.setItem('id_Obiektu', id_Obiektu);
-        wpisywanie="";
-        localStorage.setItem('wpisywanie', wpisywanie);
-        wyswietlWlasciwosci(id_Obiektu);
-    }
-    else if(event.key==="x"){
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        zaladujAktualneId();
-        if(id_Obiektu==-1)  return;
-        zaladujOs();
-        os_Optyczna[id_Obiektu].wspx =parseInt(wpisywanie, 10);
-        wpisywanie="";
-        localStorage.setItem('wpisywanie', wpisywanie);
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        main();
-    }
-    else if(event.key==="h"){
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        zaladujAktualneId();
-        if(id_Obiektu==-1)  return;
-        zaladujOs();
-        if(os_Optyczna[id_Obiektu].typ=="PromS"){        
-            wpisywanie="";
-            localStorage.setItem('wpisywanie', wpisywanie);
-            return;
-        }    
-        os_Optyczna[id_Obiektu].h =parseInt(wpisywanie, 10);
-        wpisywanie="";
-        localStorage.setItem('wpisywanie', wpisywanie);
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        main();
-    }
-    else if(event.key==="F"){
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        zaladujAktualneId();
-        if(id_Obiektu==-1)  return;
-        zaladujOs();
-        if(os_Optyczna[id_Obiektu].typ=="PromS"){        
-            wpisywanie="";
-            localStorage.setItem('wpisywanie', wpisywanie);
-            return;
-        }    
-        os_Optyczna[id_Obiektu].F =parseInt(wpisywanie, 10);
-        wpisywanie="";
-        localStorage.setItem('wpisywanie', wpisywanie);
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        main();
-    }
-    else if(event.key==="y"){
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        zaladujAktualneId();
-        if(id_Obiektu==-1)  return;
-        zaladujOs();
-        if(os_Optyczna[id_Obiektu].typ=="SoczS"){        
-            wpisywanie="";
-            localStorage.setItem('wpisywanie', wpisywanie);
-            return;
-        }    
-        os_Optyczna[id_Obiektu].wspy =parseInt(wpisywanie, 10);
-        wpisywanie="";
-        localStorage.setItem('wpisywanie', wpisywanie);
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        main();
-    }
-    else if(event.key==="a"){
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        zaladujAktualneId();
-        if(id_Obiektu==-1)  return;
-        zaladujOs();
-        if(os_Optyczna[id_Obiektu].typ=="SoczS"){        
-            wpisywanie="";
-            localStorage.setItem('wpisywanie', wpisywanie);
-            return;
-        }    
-        os_Optyczna[id_Obiektu].alfa =parseInt(wpisywanie, 10);
-        wpisywanie="";
-        localStorage.setItem('wpisywanie', wpisywanie);
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        main();
-    }
-    else if (event.key === "Backspace") {
-        wpisywanie = wpisywanie.slice(0, -1); 
-        localStorage.setItem('wpsiywanie', wpisywanie);
-    }
-
-});
-//S
-document.addEventListener("keydown", function(event) {
-    if (event.key === "S") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
-
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-        
-        localStorage.setItem('wstazka', "SYMULACJA");
-        wyswietlWstazke("SYMULACJA");
-    }
-});
-//T
-document.addEventListener("keydown", function(event) {
-    if (event.key === "T") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
-
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-        
-        localStorage.setItem('wstazka', "TWORZENIE");
-        wyswietlWstazke("TWORZENIE");
-    }
-});
-//W
-document.addEventListener("keydown", function(event) {
-    if (event.key === "W") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
-
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-        
-        zaladujAktualneId();
-        if(id_Obiektu==-1)  return;
-        wyswietlWlasciwosci(id_Obiektu);
-    }
-});
-//q
-document.addEventListener("keydown", function(event) {
-    if (event.key === "q") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        document.getElementById('okno-zaawansowane').style.display = "none";
-
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
-        
-        localStorage.setItem('wstazka', "SYMULACJA");
-        usunWstazkeWlasciwosci();
-        localStorage.setItem('id_Obiektu', -1);
-        wyswietlWstazke("SYMULACJA");
-        main();
-    }
-});
-//z
-document.addEventListener("keydown", function(event) {
-    if (event.key === "z") {
-        if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
-        zaladujAktualneId();
-        if(id_Obiektu==-1)  return;
+    if(displayStyle = "none" && wstazka === "WŁAŚCIWOŚCI"){
         document.getElementById('okno-zaawansowane').style.display = "block";
+        wyczyscWpisywanie();
     }
-});
+    else{
+        wyczyscWpisywanie();
+        return;
+    }
+}
+
+function opuscObiekt(){
+    localStorage.setItem('id_Obiektu', -1);
+    wyswietlWstazke("SYMULACJA");
+    usunWstazkeWlasciwosci();
+    main();
+}
+
+function wpiszNazwe(id){
+    zaladujAktualneId();
+    zaladujIfNazwa();
+    id = id_Obiektu;
+    if(id==-1)  return;
+    if(ifNazwa==0)  
+    {
+        ifNazwa=1;
+        localStorage.setItem("ifNazwa", ifNazwa);
+    }
+    else{
+        ifNazwa=0;
+        zaladujOs();
+        os_Optyczna[id_Obiektu].nazwa = wpisywanie;
+        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+        localStorage.setItem("ifNazwa", ifNazwa);
+        wyczyscWpisywanie();
+        main();
+    }
+}
 
 document.getElementById('zamknij').addEventListener('click', function(){
     policz();
@@ -425,6 +295,11 @@ function zaladujWpisywanie(){
         }
 }
 
+function wyczyscWpisywanie(){
+    wpisywanie="";
+    localStorage.setItem("wpisywanie", wpisywanie);
+}
+
 function usunLocalStorage(){
     if (!sessionStorage.getItem("sessionVisit")) {
         localStorage.removeItem('wstazka');
@@ -434,9 +309,17 @@ function usunLocalStorage(){
         localStorage.removeItem('pokazGrid');
         localStorage.removeItem('N1');
         localStorage.removeItem('wpisywanie');
+        localStorage.removeItem('ifNazwa');
         sessionStorage.setItem("sessionVisit", "true");
         main();
     } 
+}
+
+function zaladujIfNazwa(){
+    if(localStorage.getItem('ifNazwa'))
+        {
+            ifNazwa = localStorage.getItem('ifNazwa');
+        }
 }
 
 function odswiez_os_optyczna(){
@@ -848,7 +731,9 @@ function rysujElementyKontrolneSoczewki(id){
 
 /// Funkcje obsługi wstążek
 
-function wyswietlWstazke(wstazka){
+function wyswietlWstazke(wstazka, id_Obiektu){
+    localStorage.setItem('wstazka', wstazka);
+
     if(id_Obiektu!=-1){
         zaladujWstazkeWlasciwosci();
     }
@@ -865,6 +750,8 @@ function wyswietlWstazke(wstazka){
         zaladujTworzenie();
     }
     else{
+        document.getElementById('Opcja-symulacji').style.boxShadow = "";
+        document.getElementById('Opcja-tworzenia').style.boxShadow = "";
         zaladujWlasciwosci(id_Obiektu);
     }
 }
@@ -1066,7 +953,7 @@ function zaktualizujOs(obiekt) {
     os_Optyczna.push(nowyObiekt);
 
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-    wyswietlWlasciwosci(os_Optyczna.length - 1);
+    wyswietlWstazke("WŁAŚCIWOŚCI", os_Optyczna.length - 1);
     rysuj();
 }
 
@@ -1099,7 +986,7 @@ function tworzWstazkeWlasciwosci(){
 function dodajEventWstazkiWlasciwosci(){
     document.getElementById('Opcja-wlasciwosci').addEventListener('click', function() {
         zaladujAktualneId();
-        wyswietlWlasciwosci(id_Obiektu);
+        wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
     });
 }
 
@@ -1108,15 +995,6 @@ function usunWstazkeWlasciwosci(){
     {
         document.getElementById('Opcja-wlasciwosci').remove();
     }
-}
-
-function wyswietlWlasciwosci(id){
-    zaladujWstazkeWlasciwosci();
-    wstazka = "WŁAŚCIWOŚCI";
-    localStorage.setItem('wstazka', wstazka);
-    document.getElementById('Opcja-symulacji').style.boxShadow = "";
-    document.getElementById('Opcja-tworzenia').style.boxShadow = "";
-    zaladujWlasciwosci(id);
 }
 
 function zaladujWlasciwosci(id){
@@ -1294,20 +1172,22 @@ function EventPromS(id){
     });
 
     document.getElementById('usun').addEventListener("click", function(){
-        wstazka = "SYMULACJA";
-        localStorage.setItem('wstazka', wstazka);
-        wyswietlWstazke(wstazka);
-        os_Optyczna.splice(id, 1);
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        odswiez_os_optyczna();
-        localStorage.setItem('id_Obiektu', -1);
-        usunWstazkeWlasciwosci();
-        main();
+        usunObject(id);
     });
 }
 
+function usunObject(id){
+    wyswietlWstazke("SYMULACJA");
+    os_Optyczna.splice(id, 1);
+    localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+    odswiez_os_optyczna();
+    localStorage.setItem('id_Obiektu', -1);
+    usunWstazkeWlasciwosci();
+    main();
+}
+
 function sprawdzZgodnoscDanych(x, typ){
-    if(typ!="alfa" && typ!="wspx" && typ!="wspy"){
+    if(typ!="alfa" && typ!="wspx" && typ!="wspy" && typ!="id"){
         if(x<=0)    return false;
     }
     if(typ=="h"){
@@ -1322,6 +1202,10 @@ function sprawdzZgodnoscDanych(x, typ){
     if(typ=="alfa"){
         if(x-360*Math.floor(x/360)==90||x-360*Math.floor(x/360)==270)   return false;
     }
+    if(typ=="id"){
+        zaladujOs();
+        if(x<0||x>=os_Optyczna.length||Math.floor(x)!=x)    return false;
+    }
     if(Number.isNaN(x))  return false;
     return true;
 }
@@ -1333,21 +1217,21 @@ function policz(){
     let R1, R2, Ns;
 
     if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('R1').value) || 0 ,  "R")){
-        R1 = document.getElementById('R1').value || 0;
+        R1 = parseFloat(document.getElementById('R1').value) || 0;
     }
     else{
         return;
     }
 
     if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('R2').value) || 0 ,  "R")){
-        R2 = document.getElementById('R2').value || 0;
+        R2 = parseFloat(document.getElementById('R2').value) || 0;
     }
     else{
         return;
     }
 
     if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('Ns').value) || 0 ,  "N")){
-        Ns = document.getElementById('Ns').value || 0;
+        Ns = parseFloat(document.getElementById('Ns').value) || 0;
     }
     else{
         return;
@@ -1364,13 +1248,17 @@ function policz(){
     }
 
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+    ukryjOknoZaawansowane();
+
+    main();
+}
+
+function ukryjOknoZaawansowane(){
     document.getElementById('okno-zaawansowane').style.display = "none";
 
     document.getElementById('R1').value="";
     document.getElementById('R2').value="";
     document.getElementById('Ns').value="";
-
-    main();
 }
 
 // Klikanie
@@ -1379,7 +1267,7 @@ function sprawdzWspolrzedne(x, y){
     let cosZadzialo = 0;
     for(let i=0;i<os_Optyczna.length;i++){
         if(czykliknal(x, y, i)){
-            wyswietlWlasciwosci(i);
+            wyswietlWstazke("WŁAŚCIWOŚCI", i);
             //rysujElementyKontrolne(i);
             localStorage.setItem('id_Obiektu', i);
             cosZadzialo=1;
@@ -1389,11 +1277,7 @@ function sprawdzWspolrzedne(x, y){
 
     if(cosZadzialo==0){
             localStorage.setItem('id_Obiektu', -1);
-            wstazka = "SYMULACJA";
-            localStorage.setItem('wstazka', wstazka);
-            document.getElementById('Opcja-symulacji').style.boxShadow = "0px 0px 2px 0px black inset";
-            document.getElementById('Opcja-tworzenia').style.boxShadow = "";
-            zaladujSymulacje();
+            wyswietlWstazke("SYMULACJA");
             usunWstazkeWlasciwosci();
     }
 }
