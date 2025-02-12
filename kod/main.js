@@ -1,6 +1,6 @@
+(function(){
+"use strict";
 /// Canvas
-
-"use strict"
 
 let canvas = document.getElementById('canvas');
 canvas.style.display='block';
@@ -8,7 +8,7 @@ canvas.style.width='100%';
 canvas.style.height='100%';
 let WYSOKOSC = canvas.height=canvas.offsetHeight;
 let SZEROKOSC = canvas.width=canvas.offsetWidth;
-let j = 50;
+const j = 50;
 const ctx = canvas.getContext("2d");
 
 /// zmienne globalne
@@ -22,12 +22,13 @@ let id_Obiektu=-1;
 let pokazOgniskowe = 0;
 let pokazGrid = 0;
 let N1 = 1;
+let wpisywanie ="";
+let ifNazwa = 0;
 
 const epsilon = 1e-10;
 const margines = 10;
 const kontener = document.getElementById("trescWstazki");
-let wpisywanie ="";
-let ifNazwa = 0;
+
 
 /// Główna pętla
 
@@ -114,6 +115,20 @@ document.addEventListener("keydown", function(event) {
     else if (key === "q") opuscObiekt();
     else if (key === "N") zaktulizujZmienna("N1", "N1", id_Obiektu);
 });
+
+// logika do eventListenerów
+
+function zmianaEkranu() {
+    odswiezWspElementow();
+
+    WYSOKOSC = canvas.height = canvas.offsetHeight;
+    SZEROKOSC = canvas.width = canvas.offsetWidth;
+
+    soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
+    promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
+
+    main();
+}
 
 function Wpisz(tekst){
     wpisywanie+=tekst;
@@ -398,18 +413,6 @@ function odswiezSoczewke(id){
     os_Optyczna[id].wspx = os_Optyczna[id].wspx * (canvas.offsetWidth/SZEROKOSC);
     os_Optyczna[id].h = os_Optyczna[id].h * (canvas.offsetHeight/WYSOKOSC);
     localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
-}
-
-function zmianaEkranu() {
-    odswiezWspElementow();
-
-    WYSOKOSC = canvas.height = canvas.offsetHeight;
-    SZEROKOSC = canvas.width = canvas.offsetWidth;
-
-    soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
-    promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
-
-    main();
 }
 
 /// Funckje symulacji
@@ -1305,4 +1308,4 @@ function czykliknalPromien(x, y, i){
 
 ///
 
-
+})();
