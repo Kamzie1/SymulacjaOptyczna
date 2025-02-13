@@ -929,6 +929,7 @@ function dodajPrzycisk(id){
     przycisk.onclick = function(){
         localStorage.setItem('id_Obiektu', id);
         wyswietlWstazke("WŁAŚCIWOŚCI", id);
+        rysuj();
     }
     document.getElementById('lista-obiektow').appendChild(przycisk);
 }
