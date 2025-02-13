@@ -1,5 +1,7 @@
 (function(){
+
 "use strict";
+
 /// Canvas
 
 let canvas = document.getElementById('canvas');
@@ -24,6 +26,7 @@ let pokazGrid = 0;
 let N1 = 1;
 let wpisywanie ="";
 let ifNazwa = 0;
+let isFunctionActive = false;
 
 const epsilon = 1e-10;
 const margines = 10;
@@ -71,13 +74,12 @@ window.addEventListener("resize", zmianaEkranu);
 window.addEventListener("orientationchange", zmianaEkranu);
 
 document.getElementById('Opcja-symulacji').addEventListener('click', function() {
-    wyswietlWstazke("SYMULACJA");
+    wyswietlWstazke("SYMULACJA", id_Obiektu);
 });
 
 document.getElementById('Opcja-tworzenia').addEventListener('click', function() {
-    wyswietlWstazke("TWORZENIE");
+    wyswietlWstazke("TWORZENIE", id_Obiektu);
 });
-
 
 document.addEventListener("keydown", function(event) {
     if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
@@ -252,6 +254,7 @@ function wybierzObjekt(){
     if(!sprawdzZgodnoscDanych(wpisywanie, "id"))  {wyczyscWpisywanie(); return;}
     localStorage.setItem('id_Obiektu', wpisywanie);
     wyswietlWstazke("WŁAŚCIWOŚCI", wpisywanie);
+    rysuj();
     wyczyscWpisywanie();
 }
 
@@ -541,8 +544,9 @@ function rysuj(){
     rysuj_obiekty();
     rysujObiektyPomocnicze();
 
+    zaladujAktualneId();
     if(id_Obiektu!=-1){
-        //rysujElementyKontrolne(id_Obiektu);
+        rysujElementyKontrolne(id_Obiektu);
     }
 }
 
@@ -710,8 +714,7 @@ function rysujOgniskowe(){
 }
 
 function rysujElementyKontrolne(id){
-    zaladujOs();
-    if(os_Optyczna[id].typ=="PromS"){
+    if(os_Optyczna[id].typ==="PromS"){
         rysujElementyKontrolnePromienia(id);
     }
     else{
@@ -720,14 +723,23 @@ function rysujElementyKontrolne(id){
 }
 
 function rysujElementyKontrolnePromienia(id){
-
+    ctx.beginPath();
+    ctx.lineWidth=3;
+    ctx.arc(os_Optyczna[id].wspx, os_Optyczna[id].wspy+20, 5, 0, 360);
+    ctx.moveTo(os_Optyczna[id].wspx+20, os_Optyczna[id].wspy+20);
+    ctx.arc(os_Optyczna[id].wspx+20, os_Optyczna[id].wspy+20, 5, 0, 360);
+    ctx.fill();
+    ctx.stroke();
 }
 
 function rysujElementyKontrolneSoczewki(id){
-    let wsp = os_Optyczna[id].wspx;
     ctx.beginPath();
     ctx.lineWidth=3;
-    ctx.arc(wsp+30, WYSOKOSC/2-30, 10, 0, 360);
+    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-30, 10, 0, 360);
+    ctx.moveTo(os_Optyczna[id].wspx+30, WYSOKOSC/2-os_Optyczna[id].h+10);
+    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-os_Optyczna[id].h+10, 10, 0, 360);
+    ctx.moveTo(os_Optyczna[id].wspx+os_Optyczna[id].F, WYSOKOSC/2+80);
+    ctx.arc(os_Optyczna[id].wspx+os_Optyczna[id].F, WYSOKOSC/2+80, 10, 0, 360);
     ctx.fill();
     ctx.stroke();
 }
@@ -736,6 +748,7 @@ function rysujElementyKontrolneSoczewki(id){
 
 function wyswietlWstazke(wstazka, id_Obiektu){
     localStorage.setItem('wstazka', wstazka);
+    zaladujAktualneId();
 
     if(id_Obiektu!=-1){
         zaladujWstazkeWlasciwosci();
@@ -908,7 +921,7 @@ function dodajPrzycisk(id){
 
     przycisk.onclick = function(){
         localStorage.setItem('id_Obiektu', id);
-        wyswietlWlasciwosci(id);
+        wyswietlWstazke("WŁAŚCIWOŚCI", id);
     }
     document.getElementById('lista-obiektow').appendChild(przycisk);
 }
@@ -1269,9 +1282,39 @@ function ukryjOknoZaawansowane(){
 function sprawdzWspolrzedne(x, y){
     let cosZadzialo = 0;
     for(let i=0;i<os_Optyczna.length;i++){
+        if(id_Obiektu==i){
+            if(os_Optyczna[i].typ=="SoczS"){
+            if(x>=os_Optyczna[i].wspx+20-margines&&x<=os_Optyczna[i].wspx+40+margines&&y>= WYSOKOSC/2-40-margines&&y<= WYSOKOSC/2-20+margines){
+                zmienWspx(i, x, y, "wspx", "SoczS");
+                cosZadzialo=1;
+                break;
+            }
+            else if(x<=os_Optyczna[i].wspx+40+margines&&x>=os_Optyczna[i].wspx+20-margines&&y>=WYSOKOSC/2-os_Optyczna[i].h-margines&&y<= WYSOKOSC/2-os_Optyczna[i].h+20+margines){
+                zmienWspx(i, x, y, "h", "SoczS");
+                cosZadzialo=1;
+                break;
+            }
+            else if(x>=os_Optyczna[i].wspx+os_Optyczna[i].F-10-margines&&x<=os_Optyczna[i].wspx+os_Optyczna[i].F+10+margines&&y<= WYSOKOSC/2+90+margines&&y>=WYSOKOSC/2+70-margines){
+                zmienWspx(i, x, y, "F", "SoczS");
+                cosZadzialo=1;
+                break;
+            }
+        }
+        else if(os_Optyczna[i].typ=="PromS"){
+            if(x>=os_Optyczna[i].wspx-margines&&x<=os_Optyczna[i].wspx+margines&&y>= os_Optyczna[i].wspy+15-margines&&y<= os_Optyczna[i].wspy+25+margines){
+                zmienWspx(i, x, y, "wspXY", "PromS");
+                cosZadzialo=1;
+                break;
+            }
+            else if(x>=os_Optyczna[i].wspx+15-margines&&x<=os_Optyczna[i].wspx+15+margines&&y>= os_Optyczna[i].wspy+15-margines&&y<= os_Optyczna[i].wspy+25+margines){
+                zmienWspx(i, x, y, "alfa", "PromS");
+                cosZadzialo=1;
+                break;
+            }
+        }
+        }
         if(czykliknal(x, y, i)){
             wyswietlWstazke("WŁAŚCIWOŚCI", i);
-            //rysujElementyKontrolne(i);
             localStorage.setItem('id_Obiektu', i);
             cosZadzialo=1;
             break;
@@ -1279,9 +1322,9 @@ function sprawdzWspolrzedne(x, y){
     }
 
     if(cosZadzialo==0){
-            localStorage.setItem('id_Obiektu', -1);
-            wyswietlWstazke("SYMULACJA");
-            usunWstazkeWlasciwosci();
+        localStorage.setItem('id_Obiektu', -1);
+        wyswietlWstazke("SYMULACJA");
+        usunWstazkeWlasciwosci();
     }
 }
 
@@ -1306,6 +1349,104 @@ function czykliknalPromien(x, y, i){
     return true;
 }
 
-///
+/// przesuwanie myszą obiektów
+
+function zmienWspx(id, startX, startY, zmienna, typ) {
+    if (isFunctionActive) {
+        console.log("Funkcja już działa, operacja zablokowana.");
+        return; 
+      }
+    
+    isFunctionActive = true; 
+    
+    if (!os_Optyczna[id]) {
+        console.error(`Nie znaleziono os_Optyczna[${id}]`);
+        isFunctionActive = false; 
+        return;
+      }
+
+    let prevWspX, prevh, prevF, preva, prevWspY;
+
+    if(typ=="SoczS"){
+        prevWspX = os_Optyczna[id].wspx;
+        prevh = os_Optyczna[id].h;
+        prevF = os_Optyczna[id].F;
+    }
+    else{
+        preva = os_Optyczna[id].alfa;
+        prevWspY = os_Optyczna[id].wspy;
+        prevWspX = os_Optyczna[id].wspx;  
+    }
+
+    let prevMouseX = startX;
+    let prevMouseY = startY;
+
+    function mouseMoveHandler(event) {
+
+      const dx = event.clientX - prevMouseX;
+      const dy = event.clientY - (window.innerHeight*0.2) - prevMouseY;
+      
+      prevMouseX = event.clientX;
+      prevMouseY = event.clientY-(window.innerHeight*0.2);
+      
+      if(zmienna==="wspx")  os_Optyczna[id].wspx += dx;
+      else if(zmienna ==="h")   os_Optyczna[id].h -= dy;
+      else if(zmienna ==="F")   os_Optyczna[id].F += dx;
+      else if(zmienna === "wspXY") {os_Optyczna[id].wspy += dy; os_Optyczna[id].wspx += dx;}
+      else if(zmienna === "alfa"){
+        if(prevWspX-event.clientX<0){
+            os_Optyczna[id].alfa = -Math.atan((prevWspY-event.clientY)/(prevWspX-event.clientX))*180/Math.PI;
+        }else{
+            os_Optyczna[id].alfa =180 -Math.atan((prevWspY-event.clientY)/(prevWspX-event.clientX))*180/Math.PI;
+        }
+      } 
+
+      localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+      
+      rysuj();
+    }
+    
+    function removeListeners() {
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('click', clickHandler);
+      document.removeEventListener('keydown', keydownHandler);
+    }
+    
+    function clickHandler(event) {
+        console.log("Kliknięto");
+        removeListeners();
+        isFunctionActive = false;
+        rysuj();
+    }
+    
+    function keydownHandler(event) {
+      if (event.key === 'Escape') {
+        removeListeners();
+
+        if(typ=="SoczS"){
+        os_Optyczna[id].wspx = prevWspX;
+        os_Optyczna[id].F = prevF;
+        os_Optyczna[id].h = prevh;
+        }
+        else{
+            os_Optyczna[id].wspx = prevWspX;    
+            os_Optyczna[id].wspy = prevWspY;    
+            os_Optyczna[id].alfa = preva;  
+        }
+        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+        isFunctionActive = false;
+        rysuj();
+        console.log("Działanie przerwane przez naciśnięcie ESC.");
+      }
+    }
+    
+    document.addEventListener('mousemove', mouseMoveHandler);
+    
+    setTimeout(() => {
+      document.addEventListener('click', clickHandler);
+      document.addEventListener('keydown', keydownHandler);
+    }, 0);
+}
+  
 
 })();
