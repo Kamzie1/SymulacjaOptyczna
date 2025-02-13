@@ -81,6 +81,14 @@ document.getElementById('Opcja-tworzenia').addEventListener('click', function() 
     wyswietlWstazke("TWORZENIE", id_Obiektu);
 });
 
+document.getElementById('zamknij').addEventListener('click', function() {
+    ukryjOknoZaawansowane();
+});
+
+document.getElementById('Policz').addEventListener('click', function(){
+    policz();
+});
+
 document.addEventListener("keydown", function(event) {
     if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
 
@@ -299,10 +307,6 @@ function wpiszNazwe(id){
         main();
     }
 }
-
-document.getElementById('zamknij').addEventListener('click', function(){
-    policz();
-});
 
 /// Funkcje odświeżania
 
@@ -722,24 +726,27 @@ function rysujElementyKontrolne(id){
     }
 }
 
-function rysujElementyKontrolnePromienia(id){
+function rysujElementyKontrolnePromienia(id) {
     ctx.beginPath();
-    ctx.lineWidth=3;
-    ctx.arc(os_Optyczna[id].wspx, os_Optyczna[id].wspy+20, 5, 0, 360);
-    ctx.moveTo(os_Optyczna[id].wspx+20, os_Optyczna[id].wspy+20);
-    ctx.arc(os_Optyczna[id].wspx+20, os_Optyczna[id].wspy+20, 5, 0, 360);
+    ctx.lineWidth = 3;
+
+    ctx.arc(os_Optyczna[id].wspx, os_Optyczna[id].wspy + 20, 5, 0, 2 * Math.PI);
+    ctx.moveTo(os_Optyczna[id].wspx +50*Math.cos(os_Optyczna[id].alfa*Math.PI/180), os_Optyczna[id].wspy - 50*Math.sin(os_Optyczna[id].alfa*Math.PI/180));
+    ctx.arc(os_Optyczna[id].wspx +50*Math.cos(os_Optyczna[id].alfa*Math.PI/180), os_Optyczna[id].wspy - 50*Math.sin(os_Optyczna[id].alfa*Math.PI/180), 5, 0, 2 * Math.PI);
+
     ctx.fill();
     ctx.stroke();
 }
 
+
 function rysujElementyKontrolneSoczewki(id){
     ctx.beginPath();
     ctx.lineWidth=3;
-    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-30, 10, 0, 360);
+    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-30, 10, 0, 2 * Math.PI);
     ctx.moveTo(os_Optyczna[id].wspx+30, WYSOKOSC/2-os_Optyczna[id].h+10);
-    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-os_Optyczna[id].h+10, 10, 0, 360);
+    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-os_Optyczna[id].h+10, 10, 0, 2 * Math.PI);
     ctx.moveTo(os_Optyczna[id].wspx+os_Optyczna[id].F, WYSOKOSC/2+80);
-    ctx.arc(os_Optyczna[id].wspx+os_Optyczna[id].F, WYSOKOSC/2+80, 10, 0, 360);
+    ctx.arc(os_Optyczna[id].wspx+os_Optyczna[id].F, WYSOKOSC/2+80, 10, 0, 2 * Math.PI);
     ctx.fill();
     ctx.stroke();
 }
@@ -1306,7 +1313,7 @@ function sprawdzWspolrzedne(x, y){
                 cosZadzialo=1;
                 break;
             }
-            else if(x>=os_Optyczna[i].wspx+15-margines&&x<=os_Optyczna[i].wspx+15+margines&&y>= os_Optyczna[i].wspy+15-margines&&y<= os_Optyczna[i].wspy+25+margines){
+            else if(x>=os_Optyczna[i].wspx +50*Math.cos(os_Optyczna[i].alfa*Math.PI/180)-5-margines&&x<=os_Optyczna[i].wspx +50*Math.cos(os_Optyczna[i].alfa*Math.PI/180)+5+margines&&y>= os_Optyczna[i].wspy - 50*Math.sin(os_Optyczna[i].alfa*Math.PI/180)-5-margines&&y<= os_Optyczna[i].wspy - 50*Math.sin(os_Optyczna[i].alfa*Math.PI/180)+5+margines){
                 zmienWspx(i, x, y, "alfa", "PromS");
                 cosZadzialo=1;
                 break;
@@ -1353,7 +1360,6 @@ function czykliknalPromien(x, y, i){
 
 function zmienWspx(id, startX, startY, zmienna, typ) {
     if (isFunctionActive) {
-        console.log("Funkcja już działa, operacja zablokowana.");
         return; 
       }
     
@@ -1413,7 +1419,6 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
     }
     
     function clickHandler(event) {
-        console.log("Kliknięto");
         removeListeners();
         isFunctionActive = false;
         rysuj();
@@ -1436,7 +1441,6 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         isFunctionActive = false;
         rysuj();
-        console.log("Działanie przerwane przez naciśnięcie ESC.");
       }
     }
     
