@@ -1421,6 +1421,30 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
     function clickHandler(event) {
         removeListeners();
         isFunctionActive = false;
+        if(typ=="SoczS"){
+            if(sprawdzZgodnoscDanych(os_Optyczna[id].wspx, "wspx")&&sprawdzZgodnoscDanych(os_Optyczna[id].h, "h")&&sprawdzZgodnoscDanych(os_Optyczna[id].F, "F")){
+
+            }
+            else{
+                os_Optyczna[id].wspx = prevWspX;
+                os_Optyczna[id].F = prevF;
+                os_Optyczna[id].h = prevh;
+
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            }
+        }
+        else{
+            if(sprawdzZgodnoscDanych(os_Optyczna[id].wspx, "wspx")&&sprawdzZgodnoscDanych(os_Optyczna[id].wspy, "wspy")&&sprawdzZgodnoscDanych(os_Optyczna[id].alfa, "alfa")){
+                
+            }
+            else{
+                os_Optyczna[id].wspx = prevWspX;    
+                os_Optyczna[id].wspy = prevWspY;    
+                os_Optyczna[id].alfa = preva; 
+                 
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            }
+        }
         rysuj();
     }
     
