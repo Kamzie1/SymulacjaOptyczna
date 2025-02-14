@@ -46,6 +46,8 @@ function main(){
     zaladujGrid();
     zaladujN1();
     zaladujOgniskowe();
+    zaladujWpisywanie();
+    document.getElementById('wpisywanie').innerHTML = wpisywanie;
     wyswietlWstazke(wstazka, id_Obiektu);
 
     rysuj();
@@ -93,10 +95,10 @@ document.addEventListener("keydown", function(event) {
     if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
 
     zaladujIfNazwa();
-    zaladujAktualneId();
     zaladujWpisywanie();
     zaladujOs();
     zaladujWstazke();
+    zaladujAktualneId();
 
     const key = event.key;
     
@@ -120,10 +122,11 @@ document.addEventListener("keydown", function(event) {
     else if (key === "a") zaktulizujZmienna("alfa", "PromS", id_Obiektu);
     else if (key === "S") wyswietlWstazke("SYMULACJA", id_Obiektu);
     else if (key === "T") wyswietlWstazke("TWORZENIE", id_Obiektu);
-    else if (key === "W"&&id_Obiektu!=-1) wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
+    else if (key === "W" && id_Obiektu!=-1) wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
     else if (key === "z") pokazZaawansowane();
     else if (key === "q") opuscObiekt();
     else if (key === "N") zaktulizujZmienna("N1", "N1", id_Obiektu);
+
 });
 
 // logika do eventListenerów
@@ -141,14 +144,18 @@ function zmianaEkranu() {
 }
 
 function Wpisz(tekst){
-    wpisywanie+=tekst;
-
+    
+    wpisywanie += tekst;
+    document.getElementById('wpisywanie').innerHTML = wpisywanie;
     localStorage.setItem('wpisywanie', wpisywanie);
+    
 }
 
 function usunOstatniaLiterke(){
     wpisywanie = wpisywanie.slice(0, -1); 
 
+    document.getElementById('wpisywanie').innerHTML = wpisywanie;
+    
     localStorage.setItem('wpsiywanie', wpisywanie);
 
 }
@@ -159,39 +166,41 @@ function zaktulizujZmienna(zmienna, typ, id){
     id = id_Obiektu;
     wpisywanie = parseFloat(wpisywanie) ||0;
     if(typ === "N1"){
-        if(!sprawdzZgodnoscDanych(wpisywanie, "N")){wyczyscWpisywanie();  return;}
+        if(!sprawdzZgodnoscDanych(wpisywanie, "N")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie;  return;}
         localStorage.setItem("N1", wpisywanie);
     }
     else if(id==-1){
         wyczyscWpisywanie();
+        document.getElementById('wpisywanie').innerHTML = wpisywanie;
         return;
     }
     else if(zmienna === "wspx"){
-        if(!sprawdzZgodnoscDanych(wpisywanie, "wspx")){wyczyscWpisywanie();  return;}
+        if(!sprawdzZgodnoscDanych(wpisywanie, "wspx")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
         os_Optyczna[id].wspx = wpisywanie;
     }
     else if(typ === "PromS" && os_Optyczna[id].typ === "PromS"){
         if(zmienna === "wspy"){
-            if(!sprawdzZgodnoscDanych(wpisywanie, "wspy")){wyczyscWpisywanie();  return;}
+            if(!sprawdzZgodnoscDanych(wpisywanie, "wspy")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
             os_Optyczna[id].wspy = wpisywanie;
         }
         else if(zmienna === "alfa"){
-            if(!sprawdzZgodnoscDanych(wpisywanie, "alfa")){wyczyscWpisywanie();  return;}
+            if(!sprawdzZgodnoscDanych(wpisywanie, "alfa")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
             os_Optyczna[id].alfa = wpisywanie;
         }
     }
     else if(typ === "SoczS" && os_Optyczna[id].typ === "SoczS"){
         if(zmienna === "h"){
-            if(!sprawdzZgodnoscDanych(wpisywanie, "h")){wyczyscWpisywanie();  return;}
+            if(!sprawdzZgodnoscDanych(wpisywanie, "h")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
             os_Optyczna[id].h = wpisywanie;
         }
         else if(zmienna === "F"){
-            if(!sprawdzZgodnoscDanych(wpisywanie, "F")){wyczyscWpisywanie();  return;}
+            if(!sprawdzZgodnoscDanych(wpisywanie, "F")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
             os_Optyczna[id].F = wpisywanie;
         }
     }
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
     wyczyscWpisywanie();
+    document.getElementById('wpisywanie').innerHTML = wpisywanie;
     main();
 }
 
@@ -234,6 +243,7 @@ function Grid(wstazka){
 function esc(){
     ukryjOknoZaawansowane();
     wyczyscWpisywanie();
+    document.getElementById('wpisywanie').innerHTML = wpisywanie;
     localStorage.setItem('ifNazwa', 0);
     main();
 }
@@ -259,11 +269,12 @@ function deleteObject(id){
 
 function wybierzObjekt(){
     wpisywanie = parseFloat(wpisywanie) ||0;
-    if(!sprawdzZgodnoscDanych(wpisywanie, "id"))  {wyczyscWpisywanie(); return;}
+    if(!sprawdzZgodnoscDanych(wpisywanie, "id"))  {wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
     localStorage.setItem('id_Obiektu', wpisywanie);
     wyswietlWstazke("WŁAŚCIWOŚCI", wpisywanie);
     rysuj();
     wyczyscWpisywanie();
+    document.getElementById('wpisywanie').innerHTML = wpisywanie;
 }
 
 function pokazZaawansowane(){
@@ -272,10 +283,8 @@ function pokazZaawansowane(){
 
     if(displayStyle = "none" && wstazka === "WŁAŚCIWOŚCI"){
         document.getElementById('okno-zaawansowane').style.display = "block";
-        wyczyscWpisywanie();
     }
     else{
-        wyczyscWpisywanie();
         return;
     }
 }
@@ -296,6 +305,7 @@ function wpiszNazwe(id){
     {
         ifNazwa=1;
         localStorage.setItem("ifNazwa", ifNazwa);
+        document.getElementById('tu_wpisz').innerHTML = "   on";
     }
     else{
         ifNazwa=0;
@@ -304,6 +314,8 @@ function wpiszNazwe(id){
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         localStorage.setItem("ifNazwa", ifNazwa);
         wyczyscWpisywanie();
+        document.getElementById('wpisywanie').innerHTML = wpisywanie;
+        document.getElementById('tu_wpisz').innerHTML = "   off";
         main();
     }
 }
@@ -313,7 +325,7 @@ function wpiszNazwe(id){
 function zaladujWpisywanie(){
     if(localStorage.getItem('wpisywanie'))
         {
-            id_Obiektu = localStorage.getItem('wpisywanie');
+            wpisywanie = localStorage.getItem('wpisywanie');
         }
 }
 
@@ -754,8 +766,8 @@ function rysujElementyKontrolneSoczewki(id){
 /// Funkcje obsługi wstążek
 
 function wyswietlWstazke(wstazka, id_Obiektu){
+
     localStorage.setItem('wstazka', wstazka);
-    zaladujAktualneId();
 
     if(id_Obiektu!=-1){
         zaladujWstazkeWlasciwosci();
@@ -811,7 +823,7 @@ function wypelnijSymulacje(){
 <div class="material">
     <form class="osrodek">
         <label for="N1">N1:</label>
-        <input type="text" id="N1" placeholder="podaj N1:" value="${N1}">
+        <input type="number" id="N1" placeholder="podaj N1:" value="${N1}">
     </form>
     <span>Ośrodek</span>
 </div>
@@ -926,12 +938,36 @@ function dodajPrzycisk(id){
     przycisk.innerText = `${id} : ${os_Optyczna[id].nazwa}`;
     przycisk.classList.add("przyciskObiektu");
 
+    let usun = document.createElement("button");
+    let img = document.createElement("img");
+
+    if(window.innerWidth>800&&window.innerHeight>400){
+        img.src = "img/usun.png";
+    
+        img.classList.add("imgUsun");
+    
+        usun.appendChild(img);
+    }
+    usun.classList.add("przyciskUsun");
+
+    usun.onclick = function(){
+        usunObject(id);
+    }
+
     przycisk.onclick = function(){
         localStorage.setItem('id_Obiektu', id);
         wyswietlWstazke("WŁAŚCIWOŚCI", id);
         rysuj();
     }
-    document.getElementById('lista-obiektow').appendChild(przycisk);
+
+    let objectHolder = document.createElement("div");
+    objectHolder.classList.add("objectHolder");
+    
+    objectHolder.appendChild(przycisk);
+    objectHolder.appendChild(usun);
+
+
+    document.getElementById('lista-obiektow').appendChild(objectHolder);
 }
 
 /// Funkcje obsługi Tworzenia
@@ -1046,19 +1082,19 @@ function zaladujWlasciwosciSoczewki(id){
                         <div class="wspx">
                             <form>
                                 <label for='wspx'>Współrzędne: </label>
-                                <input type='text' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
+                                <input type='number' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
                             </form>
                         </div>
                         <div class ="h">
                             <form>
                                 <label for='h'>Wysokość soczewki: </label>
-                                <input type='text' id='h' placeholder='podaj h:' value=${os_Optyczna[id].h}
+                                <input type='number' id='h' placeholder='podaj h:' value=${os_Optyczna[id].h}
                             </form>
                         </div>
                         <div class='optyka' id='optyka'>
                             <form>
                                 <label for='F'>F: </label>
-                                <input type='text'' id='F' placeholder='podaj F:' value=${os_Optyczna[id].F}>
+                                <input type='number' id='F' placeholder='podaj F:' value=${os_Optyczna[id].F}>
                             </form>
                         </div>
                         </div>
@@ -1088,19 +1124,19 @@ function zaladujWlasciwosciPromienia(id){
                         <div class="wspx">
                             <form>
                                 <label for='wspx'>Współrzędne x: </label>
-                                <input type='text' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
+                                <input type='number' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
                             </form>
                         </div>
                         <div class ="h">
                             <form>
                                 <label for='wspy'>Współrzędne y: </label>
-                                <input type='text' id='wspy' placeholder='podaj wspy:' value=${os_Optyczna[id].wspy}>
+                                <input type='number' id='wspy' placeholder='podaj wspy:' value=${os_Optyczna[id].wspy}>
                             </form>
                         </div>
                         <div class='optyka' id='optyka'>
                             <form>
                                 <label for='alfa'>Kąt: </label>
-                                <input type='text'' id='alfa' placeholder='podaj kąt:' value=${os_Optyczna[id].alfa}>
+                                <input type='number' id='alfa' placeholder='podaj kąt:' value=${os_Optyczna[id].alfa}>
                             </form>
                         </div>
                         </div>
@@ -1260,9 +1296,9 @@ function policz(){
     else{
         return;
     }
-
     if(Ns==N1)  return;
-    if(R1==-R2) return;   
+
+    if(R1==-R2) return;
 
     if(sprawdzZgodnoscDanych(1/(((1/R1)+(1/R2))*((Ns/N1)-1)), "F")){
         os_Optyczna[id_Obiektu].F = 1/(((1/R1)+(1/R2))*((Ns/N1)-1));
@@ -1391,7 +1427,7 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
     function mouseMoveHandler(event) {
 
       const dx = event.clientX - prevMouseX;
-      const dy = event.clientY - (window.innerHeight*0.2) - prevMouseY;
+      const dy = event.clientY - Math.floor(window.innerHeight*0.2) - prevMouseY;
       
       prevMouseX = event.clientX;
       prevMouseY = event.clientY-(window.innerHeight*0.2);

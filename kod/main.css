@@ -133,14 +133,53 @@ p{
     display: inline-block;
 }
 
-.przyciskObiektu{
-    display:block;
+.objectHolder{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-evenly;
     width:100%;
+    height:25%;
+    margin: 0px;
+    padding: 0px;
+}
+
+.przyciskUsun{
+    width: 25%;
+    padding: 0px;
+    margin: 0px;
+    transition: 0.15s all ease;
+    height:100%;
+}
+
+.przyciskUsun:hover{
+    background-color: rgb(187, 176, 176);
+}
+
+.przyciskUsun:active{
+    opacity: 0.6;
+}
+
+.imgUsun{
+    width: 100%;
+    height: 100%;
+}
+
+.przyciskObiektu{
+    font-size: 0.8vw;
+    width:75%;
+    padding: 0px;
+    margin: 0px;
+    height:100%;
+    transition: 0.5s all ease;
 }
 
 .przyciskObiektu:hover{
     background-color: blue;
     color: white;
+}
+
+.przyciskObiektu:active{
+    opacity: 0.8;
 }
 
 /* Obszar symulacji*/
@@ -149,9 +188,44 @@ p{
     margin:0;
     padding:0;
     display: block;
-    height: 80%;
+    height: 78%;
     width:100%;
     background-color: white;
+}
+
+/* wpisywanie */
+
+.nav{
+    height: 2%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(92, 88, 88);
+    padding: 0px;
+    margin: 0px;
+}
+
+.wpisywanie{
+    color: white;
+    height: 100%;
+    margin-right: 10px;
+    padding: 0px;
+    font-size: 1.5vh;
+}
+
+.tryb{
+    color: white;
+    height: 100%;
+    margin-left: 10px;
+    padding: 0px;
+    font-size: 1.5vh;
+    display: flex;
+    justify-content: end;
+}
+
+.tu_wpisz{
+    margin-left: 10px;
 }
 
 /* okno zaawansowane */
@@ -237,7 +311,19 @@ p{
 
 /*elementy na całym dokumencie*/
 
-input[type="text"] {
+button:hover{
+    background-color: rgb(226, 213, 213);
+}
+
+button:active{
+    opacity: 0.6;
+}
+
+button{
+    transition: 0.15s all ease;
+}
+
+input{
     font-size: 1.7vh;           
     color: #333333;            
     background-color: #ffffff; 
@@ -252,7 +338,7 @@ input[type="text"] {
     transition: border-color 0.3s ease, box-shadow 0.3s ease; 
 }
 
-input[type="text"]:focus {
+input :focus {
     outline: none;             
     border-color: #6495ed;     
     box-shadow: 0 0 5px rgba(100, 149, 237, 0.5); 
