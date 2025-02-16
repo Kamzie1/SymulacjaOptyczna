@@ -305,7 +305,7 @@ function wpiszNazwe(id){
     {
         ifNazwa=1;
         localStorage.setItem("ifNazwa", ifNazwa);
-        document.getElementById('tu_wpisz').innerHTML = "   on";
+        document.getElementById('tu_wpisz').innerHTML = "   Włączony";
     }
     else{
         ifNazwa=0;
@@ -315,7 +315,7 @@ function wpiszNazwe(id){
         localStorage.setItem("ifNazwa", ifNazwa);
         wyczyscWpisywanie();
         document.getElementById('wpisywanie').innerHTML = wpisywanie;
-        document.getElementById('tu_wpisz').innerHTML = "   off";
+        document.getElementById('tu_wpisz').innerHTML = "   Wyłączony";
         main();
     }
 }
@@ -827,9 +827,12 @@ function wypelnijSymulacje(){
     </form>
     <span>Ośrodek</span>
 </div>
-<div class="lista-obiektow" id="lista-obiektow">
-
-        </div>`;
+<div class="obiekty" id="obiekty">
+    <div class="kontener-listy">
+        <div class="lista-obiektow" id="lista-obiektow"></div>
+    </div>
+    <span>Obiekty</span>
+</div>`;
     kontener.innerHTML=Symulacja;
 }
 
@@ -1427,7 +1430,7 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
     function mouseMoveHandler(event) {
 
       const dx = event.clientX - prevMouseX;
-      const dy = event.clientY - Math.floor(window.innerHeight*0.2) - prevMouseY;
+      const dy = event.clientY - (window.innerHeight*0.2) - prevMouseY;
       
       prevMouseX = event.clientX;
       prevMouseY = event.clientY-(window.innerHeight*0.2);

@@ -88,8 +88,12 @@ p{
     justify-content: space-between;
 }
 
-.sterowanie, .pokazywanie, .material, .lista-obiektow, .soczewki, .zrodla-swiatla, .dod_przyciski, .zaawansowane-przycisk{
+.sterowanie, .pokazywanie, .lista-obiektow, .soczewki, .zrodla-swiatla, .dod_przyciski, .zaawansowane-przycisk{
     width:30%;
+}
+
+.material{
+    width: 20%;
 }
 
 .dane{
@@ -122,14 +126,30 @@ p{
     align-items: center;
 }
 
+.obiekty{
+    height: 90%;
+    width:20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kontener-listy{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height:90%;
+    width:100%;
+}
+
 .lista-obiektow{
     overflow-y: auto;
     padding: 0px;
-    margin: 2vw;
     height: 70%;
     min-height: 70%;
     box-shadow: 0px 0px 2px 0px black inset;
-    width:10%;
+    width:60%;
     display: inline-block;
 }
 
@@ -138,13 +158,13 @@ p{
     flex-direction: row;
     justify-content: space-evenly;
     width:100%;
-    height:25%;
+    height:30%;
     margin: 0px;
     padding: 0px;
 }
 
 .przyciskUsun{
-    width: 25%;
+    width: 20%;
     padding: 0px;
     margin: 0px;
     transition: 0.15s all ease;
@@ -166,7 +186,7 @@ p{
 
 .przyciskObiektu{
     font-size: 0.8vw;
-    width:75%;
+    width:80%;
     padding: 0px;
     margin: 0px;
     height:100%;
