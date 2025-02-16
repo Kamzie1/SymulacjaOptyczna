@@ -13,10 +13,561 @@ let SZEROKOSC = canvas.width=canvas.offsetWidth;
 const j = 50;
 const ctx = canvas.getContext("2d");
 
-/// zmienne globalne
+/// deklaracja klas
 
-let soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
-let promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
+class Obiekt {
+    constructor() {
+        this._nazwa = "Obiekt";
+        this._typ = "Obiekt";
+        this._id = 0;
+    }
+
+    rysuj(){
+
+    }
+
+    wyswietl(){
+
+    }
+
+    czyKliknal(x, y){
+
+    }
+
+    filter(){
+
+    }
+
+}
+
+class Optyka extends Obiekt{
+    constructor(){
+        super();
+    }
+
+    filter(){
+        return true;
+    }
+
+    zmienBiegPromienia(){
+
+    }
+
+    wZasiegu(){
+
+    }
+}
+
+class Soczewka extends Optyka{
+    constructor(){
+        super();
+        this._F = 100;
+        this._wspx = SZEROKOSC/2;
+        this._h = WYSOKOSC/4;
+    }
+
+    set wspx(x){
+        if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+            this._wspx = x;
+    }
+
+    set h(x){
+        if(x<=WYSOKOSC/2&&x>=0&&!Number.isNaN(x))
+            this._h = x;
+    }
+
+    set F(x){
+        if(x!=0&&!Number.isNaN(x))
+            this._F = x;
+    }
+
+    odswiez(){
+        this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
+        this.h = this._h * (canvas.offsetHeight/WYSOKOSC);
+        localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
+    }
+
+    wyswietl(id){
+        this.wypelnijWstazke();
+        this.dodajEventy(id);
+    }
+
+    wypelnijWstazke(){
+        kontener.innerHTML=`<div class="dane">
+        <div class="kontener-przyciskow">
+        <div class='nazwa'>
+            <form>  
+                <label for='nazwa'>Nazwa: </label>
+                <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${this._nazwa}>
+            </form>
+        </div>
+        <div class="wspx">
+            <form>
+                <label for='wspx'>Współrzędne: </label>
+                <input type='number' id='wspx' placeholder='podaj wspx:' value=${this._wspx}>
+            </form>
+        </div>
+        <div class ="h">
+            <form>
+                <label for='h'>Wysokość soczewki: </label>
+                <input type='number' id='h' placeholder='podaj h:' value=${this._h}>
+            </form>
+        </div>
+        <div class='optyka' id='optyka'>
+            <form>
+                <label for='F'>F: </label>
+                <input type='number' id='F' placeholder='podaj F:' value=${this._F}>
+            </form>
+        </div>
+        </div>
+        <span>Właściwości</span>
+        </div>
+        <div class='dod_przyciski' id='dod_przyciski'>
+            <div class="kontener-przyciskow">
+                <button class="F-zaawansowane" id="F-zaawansowane"><img height=100% width=100% src="img/zaawansowane.png"><span class="span-przycisk">Zaawansowane</span></button>
+                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+            </div>
+            <span>Zaawansowane</span>
+        </div>`;
+    }
+
+    dodajEventy(id){
+        document.getElementById('nazwa').addEventListener("input", function(){
+            os_Optyczna[id]._nazwa = this.value;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('wspx').addEventListener("input", function(){
+            os_Optyczna[id]._wspx = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('h').addEventListener("input", function(){
+            os_Optyczna[id]._h = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('F').addEventListener("input", function(){
+            os_Optyczna[id]._F = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('usun').addEventListener("click", function(){
+            wyswietlWstazke("SYMULACJA");
+            os_Optyczna.splice(id, 1);
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            odswiez_os_optyczna();
+            localStorage.setItem('id_Obiektu', -1);
+            usunWstazkeWlasciwosci();
+            main();
+        });
+    
+        document.getElementById('F-zaawansowane').addEventListener("click", function(){
+            document.getElementById('okno-zaawansowane').style.display = "block";
+        });
+    }
+
+    czyKliknal(x, y){
+        if(this._wspx-x<-1*margines||this._wspx-x>margines)   return false;
+        if(y>this._h+WYSOKOSC/2+margines||y<-1*this._h+WYSOKOSC/2-margines)   return false;
+        return true;
+    }
+
+    wZasiegu(kierunek, xo, Px, Py){
+        if(kierunek==1){
+            if(this._wspx<=xo)    return false;
+        }
+        else{
+            if(this._wspx>=xo)    return false;
+        }
+        if(WYSOKOSC/2+this._h<Py)  return false;
+        if(WYSOKOSC/2-this._h>Py)  return false;
+        return true;
+    }
+
+    rysujOgniskowe(){
+        ctx.beginPath();
+        ctx.lineWidth=3;
+        ctx.font = "1.5vw Arial bold";
+    
+        ctx.moveTo(this._wspx-this._F, WYSOKOSC/2-10);
+        ctx.lineTo(this._wspx-this._F, WYSOKOSC/2+10);
+    
+        ctx.fillText(`F${this._nazwa}`,this._wspx-this._F, WYSOKOSC/2+10+50);
+    
+        ctx.moveTo(this._wspx+this._F, WYSOKOSC/2-10);
+        ctx.lineTo(this._wspx+this._F, WYSOKOSC/2+10);
+    
+        ctx.fillText(`F${this._nazwa}`,this._wspx+this._F, WYSOKOSC/2+10+50);
+    
+        ctx.stroke();
+    }
+
+    rysujElementyKontrolne(){
+        ctx.beginPath();
+        ctx.lineWidth=3;
+        ctx.arc(this._wspx+30, WYSOKOSC/2-30, 10, 0, 2 * Math.PI);
+        ctx.moveTo(this._wspx+30, WYSOKOSC/2-this._h+10);
+        ctx.arc(this._wspx+30, WYSOKOSC/2-this._h+10, 10, 0, 2 * Math.PI);
+        ctx.moveTo(this._wspx+this._F, WYSOKOSC/2+80);
+        ctx.arc(this._wspx+this._F, WYSOKOSC/2+80, 10, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    prev(){
+        return [this._wspx, this._h, this._F];
+    }
+
+    wrocPrev(prev){
+        this.wspx = prev[0];
+        this.h = prev[1];
+        this.F = prev[2];
+    }
+
+    klikniety(x, y){
+        if(x>=this._wspx+20-margines&&x<=this._wspx+40+margines&&y>= WYSOKOSC/2-40-margines&&y<= WYSOKOSC/2-20+margines){
+            zmienWspx(this._id, x, y, "wspx", "SoczS");
+            return 1;
+        }
+        else if(x<=this._wspx+40+margines&&x>=this._wspx+20-margines&&y>=WYSOKOSC/2-this._h-margines&&y<= WYSOKOSC/2-this._h+20+margines){
+            zmienWspx(this._id, x, y, "h", "SoczS");
+            return 1;
+        }
+        else if(x>=this._wspx+this._F-10-margines&&x<=this._wspx+this._F+10+margines&&y<= WYSOKOSC/2+90+margines&&y>=WYSOKOSC/2+70-margines){
+            zmienWspx(this._id, x, y, "F", "SoczS");
+            return 1;
+        }
+    }
+}
+
+class SoczewkaSkupiajaca extends Soczewka{
+    constructor(){
+        super();
+        this._typ = "SoczewkaSkupiajaca";
+        this._nazwa = "SoczS";
+    }
+
+    rysuj(){
+        ctx.beginPath();
+        ctx.lineWidth=2;
+    
+        ctx.moveTo(this._wspx,WYSOKOSC/2-this._h);
+        ctx.lineTo(this._wspx-10,WYSOKOSC/2-this._h+10)
+    
+        ctx.moveTo(this._wspx,WYSOKOSC/2-this._h);
+        ctx.lineTo(this._wspx+10,WYSOKOSC/2-this._h+10)
+    
+        ctx.moveTo(this._wspx,WYSOKOSC/2-this._h)
+        ctx.lineTo(this._wspx, WYSOKOSC/2+this._h);
+    
+        ctx.lineTo(this._wspx-10,WYSOKOSC/2+this._h-10)
+        ctx.moveTo(this._wspx,WYSOKOSC/2+this._h);
+        ctx.lineTo(this._wspx+10,WYSOKOSC/2+this._h-10)
+    
+        ctx.stroke();
+    }
+
+    zmienBiegPromienia(kierunek, a, b, xo, Px, Py){
+        let b_pomo = WYSOKOSC/2 - a*(this._wspx - (kierunek*this._F));
+        let y_pomo = a*this._wspx + b_pomo;
+        
+        if((this._wspx +(kierunek*this._F))-xo!=0)
+            a = (y_pomo-Py)/((this._wspx + (kierunek*this._F))-xo);
+        else
+            a = NaN;
+        b = y_pomo-a*(this._wspx + (kierunek*this._F));
+        return [a, b];
+    }
+
+}
+
+class SoczewkaRozpraszajaca extends Soczewka{
+    constructor(){
+        super();
+        this._typ = "SoczewkaRozpraszajaca";
+        this._nazwa = "SoczR";
+    }
+
+    rysuj(){
+        ctx.beginPath();
+        ctx.lineWidth=2;
+    
+        ctx.moveTo(this._wspx,WYSOKOSC/2-this._h);
+        ctx.lineTo(this._wspx-10,WYSOKOSC/2-this._h-10)
+    
+        ctx.moveTo(this._wspx,WYSOKOSC/2-this._h);
+        ctx.lineTo(this._wspx+10,WYSOKOSC/2-this._h-10)
+    
+        ctx.moveTo(this._wspx,WYSOKOSC/2-this._h)
+        ctx.lineTo(this._wspx, WYSOKOSC/2+this._h);
+    
+        ctx.lineTo(this._wspx-10,WYSOKOSC/2+this._h+10)
+        ctx.moveTo(this._wspx,WYSOKOSC/2+this._h);
+        ctx.lineTo(this._wspx+10,WYSOKOSC/2+this._h+10)
+    
+        ctx.stroke();
+    }
+
+    zmienBiegPromienia(kierunek, a, b, xo, Px, Py){
+        let b_pomo = WYSOKOSC/2 - a*(this._wspx + (kierunek*this._F));
+        let y_pomo = a*this._wspx + b_pomo;
+        
+        if((this._wspx -(kierunek*this._F))-xo!=0)
+            a = (y_pomo-Py)/((this._wspx - (kierunek*this._F))-xo);
+        else
+            a = NaN;
+        b = y_pomo-a*(this._wspx - (kierunek*this._F));
+        return [a, b];
+    }
+}
+
+class ZrodloSwiatla extends Obiekt{
+    constructor(){
+        super();
+    }
+
+    filter(){
+        return false;
+    }
+
+    Symuluj(){
+
+    }
+}
+
+class Promien extends ZrodloSwiatla{
+    constructor(){
+        super();
+        this._typ = "Promien";
+        this._nazwa = "PromS";
+        this._wspx = SZEROKOSC/4;
+        this._wspy = WYSOKOSC/3;
+        this._alfa = 0;
+    }
+
+    set wspx(x){
+        if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+            this._wspx = x;
+    }
+
+    set wspy(x){
+        if(x<=WYSOKOSC&&x>=0&&!Number.isNaN(x))
+            this._wspy = x;
+    }
+    
+    odswiez(){
+        this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
+        this.wspy = this._wspy * (canvas.offsetHeight/WYSOKOSC);
+        localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
+    }
+
+    wyswietl(id){
+        this.wypelnijWstazke();
+        this.dodajEventy(id);
+    }
+
+    wypelnijWstazke(){
+        kontener.innerHTML=`<div class="dane">
+        <div class="kontener-przyciskow">
+        <div class='nazwa'>
+            <form>  
+                <label for='nazwa'>Nazwa: </label>
+                <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${this._nazwa}>
+            </form>
+        </div>
+        <div class="wspx">
+            <form>
+                <label for='wspx'>Współrzędne x: </label>
+                <input type='number' id='wspx' placeholder='podaj wspx:' value=${this._wspx}>
+            </form>
+        </div>
+        <div class ="h">
+            <form>
+                <label for='wspy'>Współrzędne y: </label>
+                <input type='number' id='wspy' placeholder='podaj wspy:' value=${this._wspy}>
+            </form>
+        </div>
+        <div class='optyka' id='optyka'>
+            <form>
+                <label for='alfa'>Kąt: </label>
+                <input type='number' id='alfa' placeholder='podaj kąt:' value=${this._alfa}>
+            </form>
+        </div>
+        </div>
+        <span>Właściwości</span>
+        </div>
+        <div class='dod_przyciski' id='dod_przyciski'>
+            <div class="kontener-przyciskow">
+                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+            </div>
+            <span>Usuwanie</span>
+        </div>`;
+    }
+
+    dodajEventy(id){
+        document.getElementById('nazwa').addEventListener("input", function(){
+            os_Optyczna[id]._nazwa = this.value;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('wspx').addEventListener("input", function(){
+            os_Optyczna[id]._wspx = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('wspy').addEventListener("input", function(){
+            os_Optyczna[id]._wspy = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('alfa').addEventListener("input", function(){
+            os_Optyczna[id]._alfa = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            rysuj();
+        });
+    
+        document.getElementById('usun').addEventListener("click", function(){
+            wyswietlWstazke("SYMULACJA");
+            os_Optyczna.splice(this._id, 1);
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            odswiez_os_optyczna();
+            localStorage.setItem('id_Obiektu', -1);
+            usunWstazkeWlasciwosci();
+            main();
+        });
+    }
+
+    czyKliknal(x, y){
+        if(this._wspx-x<-1*margines||this._wspx-x>margines)   return false;
+        if(this._wspy-y<-1*margines||this._wspy-y>margines)   return false;
+        return true;
+    }
+
+    rysuj(){
+        let dl = 30;
+    
+        ctx.beginPath();
+        ctx.lineWidth=2;
+    
+        ctx.moveTo(this._wspx, this._wspy);
+        ctx.arc(this._wspx, this._wspy, 2, 0, Math.PI * 2, true);
+        ctx.fill();
+    
+        ctx.moveTo(this._wspx, this._wspy);
+        ctx.lineTo(this._wspx +dl*Math.cos(this._alfa*Math.PI/180),this._wspy - dl*Math.sin(this._alfa*Math.PI/180));
+    
+        ctx.stroke();
+    }
+
+    Symuluj(){
+    let obiektyOptyczne = os_Optyczna.filter(obj => obj.filter());
+    let a, b, xo, yo, kierunek, Py, Pmin;
+
+    if(this._alfa-360*Math.floor(this._alfa/360)<=270&&this._alfa-360*Math.floor(this._alfa/360)>=90){
+        kierunek=-1;
+    }
+    else{
+        kierunek=1;
+    }
+
+    xo = this._wspx;
+    yo = this._wspy;
+
+    a = Math.tan((Math.PI/180*(180-this._alfa)));
+    b = yo-a*xo;
+
+    ctx.beginPath();
+    ctx.lineWidth=2;
+    ctx.moveTo(xo, yo);
+
+    while(true){
+        let min = SZEROKOSC+100;
+        let min_id = -1;
+        for(let i=0;i<obiektyOptyczne.length;i++){
+            Py = a*obiektyOptyczne[i]._wspx + b;
+
+            if(!obiektyOptyczne[i].wZasiegu(kierunek, xo, 0, Py)){
+                continue;
+            }
+
+            if(Math.abs(xo-obiektyOptyczne[i]._wspx)<min){
+                min = Math.abs(xo-obiektyOptyczne[i]._wspx);
+                min_id = i;
+                Pmin = Py;
+            }
+        }
+
+        if(min_id==-1){
+            if(kierunek==1)
+            {
+                if(Math.abs(a)<epsilon)
+                    ctx.lineTo(SZEROKOSC, b);
+                else{
+                    ctx.lineTo(SZEROKOSC+100, a*(SZEROKOSC+100)+b);
+                }
+            }
+            else{
+                if(Math.abs(a)<epsilon)
+                    ctx.lineTo(0, b);
+                else
+                    ctx.lineTo( -100,a*(-100)+b);
+            }
+            ctx.stroke();
+            break;
+        }
+
+        ctx.lineTo(obiektyOptyczne[min_id]._wspx, Pmin);
+        xo = obiektyOptyczne[min_id]._wspx;
+
+        [a, b] = obiektyOptyczne[min_id].zmienBiegPromienia(kierunek, a, b, xo, 0, Pmin);
+
+    }
+    }
+
+    rysujElementyKontrolne(){
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+    
+        ctx.arc(this._wspx, this._wspy + 20, 5, 0, 2 * Math.PI);
+        ctx.moveTo(this._wspx +50*Math.cos(this._alfa*Math.PI/180), this._wspy - 50*Math.sin(this._alfa*Math.PI/180));
+        ctx.arc(this._wspx +50*Math.cos(this._alfa*Math.PI/180), this._wspy - 50*Math.sin(this._alfa*Math.PI/180), 5, 0, 2 * Math.PI);
+    
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    prev(){
+        return [this._wspx, this._wspy, this._alfa];
+    }
+
+    wrocPrev(prev){
+        this.wspx = prev[0];
+        this.wspy = prev[1];
+        this.alfa = prev[2];
+    }
+
+    klikniety(x, y){
+        if(x>=this._wspx-margines&&x<=this._wspx+margines&&y>= this._wspy+15-margines&&y<= this._wspy+25+margines){
+            zmienWspx(this._id, x, y, "wspXY");
+            return 1;
+        }
+        else if(x>=this._wspx +50*Math.cos(this._alfa*Math.PI/180)-5-margines&&x<=this._wspx +50*Math.cos(this._alfa*Math.PI/180)+5+margines&&y>= this._wspy - 50*Math.sin(this._alfa*Math.PI/180)-5-margines&&y<= this._wspy - 50*Math.sin(this._alfa*Math.PI/180)+5+margines){
+            zmienWspx(this._id, x, y, "alfa");
+            return 1;
+        }
+    }
+
+}
+
+/// zmienne globalne
 
 let os_Optyczna;
 let wstazka="SYMULACJA";
@@ -111,8 +662,8 @@ document.addEventListener("keydown", function(event) {
     else if (key === "Delete") deleteObject(id_Obiektu);
     else if (key === " " || event.code === "Space") Ogniskowe(wstazka);
     else if (key === "g") Grid(wstazka);
-    else if (key === "s") zaktualizujOs(soczewkaSkupiajaca);
-    else if (key === "p") zaktualizujOs(promienSwietlny);
+    else if (key === "s") zaktualizujOs(SoczewkaSkupiajaca);
+    else if (key === "p") zaktualizujOs(Promien);
     else if (key>="0" && key <="9" ||key===".") Wpisz(key);
     else if (key === "o") wybierzObjekt();
     else if (key === "x") zaktulizujZmienna("wspx", "obiekt", id_Obiektu);
@@ -136,9 +687,6 @@ function zmianaEkranu() {
 
     WYSOKOSC = canvas.height = canvas.offsetHeight;
     SZEROKOSC = canvas.width = canvas.offsetWidth;
-
-    soczewkaSkupiajaca = {nazwa: "SoczS", typ: "SoczS", wspx: SZEROKOSC/2, h: WYSOKOSC/4, F: 100, id: 0, P:0};
-    promienSwietlny = {nazwa: "PromS", typ: "PromS", wspx: SZEROKOSC/4, wspy: WYSOKOSC/3, alfa: 0, id: 0};
 
     main();
 }
@@ -281,7 +829,7 @@ function pokazZaawansowane(){
     let okno = document.getElementById('okno-zaawansowane');
     let displayStyle = window.getComputedStyle(okno).display; 
 
-    if(displayStyle = "none" && wstazka === "WŁAŚCIWOŚCI"){
+    if(displayStyle === "none" && wstazka === "WŁAŚCIWOŚCI"){
         document.getElementById('okno-zaawansowane').style.display = "block";
     }
     else{
@@ -310,7 +858,7 @@ function wpiszNazwe(id){
     else{
         ifNazwa=0;
         zaladujOs();
-        os_Optyczna[id_Obiektu].nazwa = wpisywanie;
+        os_Optyczna[id_Obiektu]._nazwa = wpisywanie;
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         localStorage.setItem("ifNazwa", ifNazwa);
         wyczyscWpisywanie();
@@ -336,14 +884,7 @@ function wyczyscWpisywanie(){
 
 function usunLocalStorage(){
     if (!sessionStorage.getItem("sessionVisit")) {
-        localStorage.removeItem('wstazka');
-        localStorage.removeItem('os_Optyczna');
-        localStorage.removeItem('id_Obiektu');
-        localStorage.removeItem('pokazOgniskowe');
-        localStorage.removeItem('pokazGrid');
-        localStorage.removeItem('N1');
-        localStorage.removeItem('wpisywanie');
-        localStorage.removeItem('ifNazwa');
+        localStorage.clear();
         sessionStorage.setItem("sessionVisit", "true");
         main();
     } 
@@ -360,7 +901,7 @@ function odswiez_os_optyczna(){
     zaladujOs();
     for(let i=0;i<os_Optyczna.length;i++)
     {
-        os_Optyczna[i].id = i;
+        os_Optyczna[i]._id = i;
     }
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
 }
@@ -376,6 +917,12 @@ function zaladujOs(){
     if(localStorage.getItem('os_Optyczna'))
     {
             os_Optyczna = JSON.parse(localStorage.getItem('os_Optyczna'));
+            os_Optyczna = os_Optyczna.map(obj => {
+                if (obj._typ === "SoczewkaSkupiajaca") return Object.assign(new SoczewkaSkupiajaca(), obj);
+                if (obj._typ === "SoczewkaRozpraszajaca") return Object.assign(new SoczewkaRozpraszajaca(), obj);
+                if (obj._typ === "Promien") return Object.assign(new Promien(), obj);
+                return obj;  
+            });
     }
     else
     {
@@ -415,139 +962,17 @@ function zaladujN1(){
 
 function odswiezWspElementow(){
     for(let i=0;i<os_Optyczna.length;i++){
-        if(os_Optyczna[i].typ === "PromS")
-            odswiezPromien(i);
-        else if(os_Optyczna[i].typ === "SoczS")
-            odswiezSoczewke(i);
+        os_Optyczna[i].odswiez();
     }
-}
-
-function odswiezPromien(id){
-    os_Optyczna[id].wspx = os_Optyczna[id].wspx * (canvas.offsetWidth/SZEROKOSC);
-    os_Optyczna[id].wspy = os_Optyczna[id].wspy * (canvas.offsetHeight/WYSOKOSC);
-    localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
-}
-
-function odswiezSoczewke(id){
-    os_Optyczna[id].wspx = os_Optyczna[id].wspx * (canvas.offsetWidth/SZEROKOSC);
-    os_Optyczna[id].h = os_Optyczna[id].h * (canvas.offsetHeight/WYSOKOSC);
-    localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
 }
 
 /// Funckje symulacji
 
-function filterOptyki(object){
-    return object.typ == "SoczS";
-}
-
-function filterZrodlaSwiatla(object){
-    return object.typ == "PromS";
-}
-
 function uruchomSymulacje(){
     zaladujOs();
-    let zrodla_swiatla = os_Optyczna.filter(filterZrodlaSwiatla);
+    let zrodla_swiatla = os_Optyczna.filter(obj => !(obj.filter()));
     for(let i=0;i<zrodla_swiatla.length;i++){
-        Symuluj(zrodla_swiatla[i].wspx, zrodla_swiatla[i].wspy, zrodla_swiatla[i].alfa, os_Optyczna);
-    }
-}
-
-function wZasiegu(wspx, h, P, xo, kierunek){
-    if(kierunek==1){
-        if(wspx<=xo)    return false;
-    }
-    else{
-        if(wspx>=xo)    return false;
-    }
-    if(WYSOKOSC/2+h<P)  return false;
-    if(WYSOKOSC/2-h>P)  return false;
-    return true;
-}
-
-function Symuluj(wspx, wspy, alfa, os_Optyczna){
-    let obiektyOptyczne = os_Optyczna.filter(filterOptyki);
-    let a, b, xo, yo, y_pomo, b_pomo, kierunek;
-
-    if(alfa-360*Math.floor(alfa/360)<=270&&alfa-360*Math.floor(alfa/360)>=90){
-        kierunek=-1;
-    }
-    else{
-        kierunek=1;
-    }
-
-    xo = wspx;
-    yo = wspy;
-
-    a = Math.tan((Math.PI/180*(180-alfa)));
-    b = yo-a*xo;
-
-    ctx.beginPath();
-    ctx.lineWidth=2;
-    ctx.moveTo(xo, yo);
-
-    while(true){
-        let min = SZEROKOSC+100;
-        let min_id = -1;
-        for(let i=0;i<obiektyOptyczne.length;i++){
-            obiektyOptyczne[i].P = a*obiektyOptyczne[i].wspx + b;
-
-            if(!wZasiegu(obiektyOptyczne[i].wspx, obiektyOptyczne[i].h, obiektyOptyczne[i].P, xo, kierunek)){
-                continue;
-            }
-
-            if(Math.abs(xo-obiektyOptyczne[i].wspx)<min){
-                min = Math.abs(xo-obiektyOptyczne[i].wspx);
-                min_id = i;
-            }
-        }
-
-        if(min_id==-1){
-            if(kierunek==1)
-            {
-                if(Math.abs(a)<epsilon)
-                    ctx.lineTo(SZEROKOSC, b);
-                else{
-                    ctx.lineTo(SZEROKOSC+100, a*(SZEROKOSC+100)+b);
-                }
-            }
-            else{
-                if(Math.abs(a)<epsilon)
-                    ctx.lineTo(0, b);
-                else
-                    ctx.lineTo( -100,a*(-100)+b);
-            }
-            ctx.stroke();
-            break;
-        }
-
-        ctx.lineTo(obiektyOptyczne[min_id].wspx, obiektyOptyczne[min_id].P);
-        xo = obiektyOptyczne[min_id].wspx;
-
-        if(kierunek==1){
-            b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
-            y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
-            
-            if((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo!=0)
-                a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F)-xo);
-            else{
-                alert("błąd");
-                break;
-            }
-            b = y_pomo-a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
-        }
-        else{
-            b_pomo = WYSOKOSC/2 - a*(obiektyOptyczne[min_id].wspx + obiektyOptyczne[min_id].F);
-            y_pomo = a*obiektyOptyczne[min_id].wspx + b_pomo;
-            
-            if((obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F)-xo!=0)
-                a = (y_pomo-obiektyOptyczne[min_id].P)/((obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F)-xo);
-            else{
-                alert("błąd");
-                break;
-            }
-            b = y_pomo-a*(obiektyOptyczne[min_id].wspx - obiektyOptyczne[min_id].F);
-        }
-
+        zrodla_swiatla[i].Symuluj();
     }
 }
 
@@ -562,47 +987,8 @@ function rysuj(){
 
     zaladujAktualneId();
     if(id_Obiektu!=-1){
-        rysujElementyKontrolne(id_Obiektu);
+        os_Optyczna[id_Obiektu].rysujElementyKontrolne();
     }
-}
-
-function rysuj_soczS(id){
-    if (!os_Optyczna[id]) return;
-
-    ctx.beginPath();
-    ctx.lineWidth=2;
-
-    ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h);
-    ctx.lineTo(os_Optyczna[id].wspx-10,WYSOKOSC/2-os_Optyczna[id].h+10)
-
-    ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h);
-    ctx.lineTo(os_Optyczna[id].wspx+10,WYSOKOSC/2-os_Optyczna[id].h+10)
-
-    ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2-os_Optyczna[id].h)
-    ctx.lineTo(os_Optyczna[id].wspx, WYSOKOSC/2+ os_Optyczna[id].h);
-
-    ctx.lineTo(os_Optyczna[id].wspx-10,WYSOKOSC/2+os_Optyczna[id].h-10)
-    ctx.moveTo(os_Optyczna[id].wspx,WYSOKOSC/2+os_Optyczna[id].h);
-    ctx.lineTo(os_Optyczna[id].wspx+10,WYSOKOSC/2+os_Optyczna[id].h-10)
-
-    ctx.stroke();
-}
-
-function rysuj_promS(id){
-    let dl = 30;
-    if (!os_Optyczna[id]) return;
-
-    ctx.beginPath();
-    ctx.lineWidth=2;
-
-    ctx.moveTo(os_Optyczna[id].wspx, os_Optyczna[id].wspy);
-    ctx.arc(os_Optyczna[id].wspx, os_Optyczna[id].wspy, 2, 0, Math.PI * 2, true);
-    ctx.fill();
-
-    ctx.moveTo(os_Optyczna[id].wspx, os_Optyczna[id].wspy);
-    ctx.lineTo(os_Optyczna[id].wspx +dl*Math.cos(os_Optyczna[id].alfa*Math.PI/180), os_Optyczna[id].wspy - dl*Math.sin(os_Optyczna[id].alfa*Math.PI/180));
-
-    ctx.stroke();
 }
 
 function rysuj_os(){
@@ -617,16 +1003,9 @@ function rysuj_os(){
 
 function rysuj_obiekty(){
     for(let i=0;i<os_Optyczna.length; i++)
-        {
-            if(os_Optyczna[i].typ=='SoczS')
-            {
-                rysuj_soczS(i);
-            }
-            else if(os_Optyczna[i].typ=='PromS')
-            {
-                rysuj_promS(i);
-            }
-        }
+    {
+        os_Optyczna[i].rysuj();
+    }
 }
 
 function rysujObiektyPomocnicze(){
@@ -707,60 +1086,10 @@ function rysujOsPozioma(odl){
 }
 
 function rysujOgniskowe(){
-    ctx.beginPath();
-    ctx.lineWidth=3;
-    ctx.font = "1.5vw Arial bold";
-
     for(let i=0;i<os_Optyczna.length;i++){
-
-        if(os_Optyczna[i].typ=="PromS") continue;
-
-        ctx.moveTo(os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2-10);
-        ctx.lineTo(os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2+10);
-
-        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx-os_Optyczna[i].F, WYSOKOSC/2+10+50);
-
-        ctx.moveTo(os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2-10);
-        ctx.lineTo(os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2+10);
-
-        ctx.fillText(`F${os_Optyczna[i].nazwa}`,os_Optyczna[i].wspx+os_Optyczna[i].F, WYSOKOSC/2+10+50);
+        if(os_Optyczna[i].filter())
+            os_Optyczna[i].rysujOgniskowe();
     }
-
-    ctx.stroke();
-}
-
-function rysujElementyKontrolne(id){
-    if(os_Optyczna[id].typ==="PromS"){
-        rysujElementyKontrolnePromienia(id);
-    }
-    else{
-        rysujElementyKontrolneSoczewki(id);
-    }
-}
-
-function rysujElementyKontrolnePromienia(id) {
-    ctx.beginPath();
-    ctx.lineWidth = 3;
-
-    ctx.arc(os_Optyczna[id].wspx, os_Optyczna[id].wspy + 20, 5, 0, 2 * Math.PI);
-    ctx.moveTo(os_Optyczna[id].wspx +50*Math.cos(os_Optyczna[id].alfa*Math.PI/180), os_Optyczna[id].wspy - 50*Math.sin(os_Optyczna[id].alfa*Math.PI/180));
-    ctx.arc(os_Optyczna[id].wspx +50*Math.cos(os_Optyczna[id].alfa*Math.PI/180), os_Optyczna[id].wspy - 50*Math.sin(os_Optyczna[id].alfa*Math.PI/180), 5, 0, 2 * Math.PI);
-
-    ctx.fill();
-    ctx.stroke();
-}
-
-
-function rysujElementyKontrolneSoczewki(id){
-    ctx.beginPath();
-    ctx.lineWidth=3;
-    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-30, 10, 0, 2 * Math.PI);
-    ctx.moveTo(os_Optyczna[id].wspx+30, WYSOKOSC/2-os_Optyczna[id].h+10);
-    ctx.arc(os_Optyczna[id].wspx+30, WYSOKOSC/2-os_Optyczna[id].h+10, 10, 0, 2 * Math.PI);
-    ctx.moveTo(os_Optyczna[id].wspx+os_Optyczna[id].F, WYSOKOSC/2+80);
-    ctx.arc(os_Optyczna[id].wspx+os_Optyczna[id].F, WYSOKOSC/2+80, 10, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.stroke();
 }
 
 /// Funkcje obsługi wstążek
@@ -787,7 +1116,7 @@ function wyswietlWstazke(wstazka, id_Obiektu){
     else{
         document.getElementById('Opcja-symulacji').style.boxShadow = "";
         document.getElementById('Opcja-tworzenia').style.boxShadow = "";
-        zaladujWlasciwosci(id_Obiektu);
+        os_Optyczna[id_Obiektu].wyswietl(id_Obiektu);
     }
 }
 
@@ -938,7 +1267,7 @@ function wyczysc(){
 
 function dodajPrzycisk(id){
     let przycisk = document.createElement("button");
-    przycisk.innerText = `${id} : ${os_Optyczna[id].nazwa}`;
+    przycisk.innerText = `${id} : ${os_Optyczna[id]._nazwa}`;
     przycisk.classList.add("przyciskObiektu");
 
     let usun = document.createElement("button");
@@ -986,6 +1315,7 @@ function wypelnijTworzenie(){
     let Tworzenie = `<div class='soczewki'>
                     <div class="kontener-przyciskow">
                         <button class='skupiajaca' id='skupiajaca'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Skupiająca</span></button>
+                        <button class='rozpraszajaca' id='rozpraszajaca'><img height=100% width=100% src="img/rozpraszajaca.png"><span class="span-przycisk">Rozpraszająca</span></button>
                     </div>
                     <span>Soczewki</span>
                 </div>
@@ -1000,23 +1330,28 @@ function wypelnijTworzenie(){
 
 function dodajEventTworzenia(){
     document.getElementById('skupiajaca').addEventListener('click', function(){
-        zaktualizujOs(soczewkaSkupiajaca);
+        zaktualizujOs(SoczewkaSkupiajaca);
+    });
+
+    document.getElementById('skupiajaca').addEventListener('click', function(){
+        zaktualizujOs(SoczewkaRozpraszajaca);
     });
     
     document.getElementById('promien-swietlny').addEventListener('click', function(){
-        zaktualizujOs(promienSwietlny);
+        zaktualizujOs(Promien);
     });
 }
 
 function zaktualizujOs(obiekt) {  
-    let nowyObiekt = { ...obiekt }; 
-    nowyObiekt.id = os_Optyczna.length;
+    let nowyObiekt = new obiekt(); 
+    nowyObiekt._id = os_Optyczna.length;
 
     localStorage.setItem('id_Obiektu', os_Optyczna.length);
     os_Optyczna.push(nowyObiekt);
 
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
     wyswietlWstazke("WŁAŚCIWOŚCI", os_Optyczna.length - 1);
+    console.log(obiekt);
     rysuj();
 }
 
@@ -1058,185 +1393,6 @@ function usunWstazkeWlasciwosci(){
     {
         document.getElementById('Opcja-wlasciwosci').remove();
     }
-}
-
-function zaladujWlasciwosci(id){
-    if(os_Optyczna[id].typ =="SoczS")
-    {
-        zaladujWlasciwosciSoczewki(id);
-    }
-    else if(os_Optyczna[id].typ =="PromS")
-    {
-        zaladujWlasciwosciPromienia(id);
-    }
-}
-
-function zaladujWlasciwosciSoczewki(id){
-    if (!os_Optyczna[id]) return;
-
-    kontener.innerHTML=`<div class="dane">
-                        <div class="kontener-przyciskow">
-                        <div class='nazwa'>
-                            <form>  
-                                <label for='nazwa'>Nazwa: </label>
-                                <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${os_Optyczna[id].nazwa}>
-                            </form>
-                        </div>
-                        <div class="wspx">
-                            <form>
-                                <label for='wspx'>Współrzędne: </label>
-                                <input type='number' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
-                            </form>
-                        </div>
-                        <div class ="h">
-                            <form>
-                                <label for='h'>Wysokość soczewki: </label>
-                                <input type='number' id='h' placeholder='podaj h:' value=${os_Optyczna[id].h}>
-                            </form>
-                        </div>
-                        <div class='optyka' id='optyka'>
-                            <form>
-                                <label for='F'>F: </label>
-                                <input type='number' id='F' placeholder='podaj F:' value=${os_Optyczna[id].F}>
-                            </form>
-                        </div>
-                        </div>
-                        <span>Właściwości</span>
-                        </div>
-                        <div class='dod_przyciski' id='dod_przyciski'>
-                            <div class="kontener-przyciskow">
-                                <button class="F-zaawansowane" id="F-zaawansowane"><img height=100% width=100% src="img/zaawansowane.png"><span class="span-przycisk">Zaawansowane</span></button>
-                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
-                            </div>
-                            <span>Zaawansowane</span>
-                        </div>`;
-    EventSoczS(id);
-}
-
-function zaladujWlasciwosciPromienia(id){
-    if (!os_Optyczna[id]) return;
-
-    kontener.innerHTML=`<div class="dane">
-                        <div class="kontener-przyciskow">
-                        <div class='nazwa'>
-                            <form>  
-                                <label for='nazwa'>Nazwa: </label>
-                                <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${os_Optyczna[id].nazwa}>
-                            </form>
-                        </div>
-                        <div class="wspx">
-                            <form>
-                                <label for='wspx'>Współrzędne x: </label>
-                                <input type='number' id='wspx' placeholder='podaj wspx:' value=${os_Optyczna[id].wspx}>
-                            </form>
-                        </div>
-                        <div class ="h">
-                            <form>
-                                <label for='wspy'>Współrzędne y: </label>
-                                <input type='number' id='wspy' placeholder='podaj wspy:' value=${os_Optyczna[id].wspy}>
-                            </form>
-                        </div>
-                        <div class='optyka' id='optyka'>
-                            <form>
-                                <label for='alfa'>Kąt: </label>
-                                <input type='number' id='alfa' placeholder='podaj kąt:' value=${os_Optyczna[id].alfa}>
-                            </form>
-                        </div>
-                        </div>
-                        <span>Właściwości</span>
-                        </div>
-                        <div class='dod_przyciski' id='dod_przyciski'>
-                            <div class="kontener-przyciskow">
-                                <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
-                            </div>
-                            <span>Usuwanie</span>
-                        </div>`;
-    EventPromS(id);
-}
-
-function EventSoczS(id){
-    document.getElementById('nazwa').addEventListener("input", function(){
-        os_Optyczna[id].nazwa = this.value;
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('wspx').addEventListener("input", function(){
-        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "wspx")){
-            os_Optyczna[id].wspx = parseFloat(this.value) || 0;
-        }
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('h').addEventListener("input", function(){
-        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "h")){
-            os_Optyczna[id].h = parseFloat(this.value) || 0;
-        }
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('F').addEventListener("input", function(){
-        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "F")){
-            os_Optyczna[id].F = parseFloat(this.value) || 0;
-        }
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('usun').addEventListener("click", function(){
-        wstazka = "SYMULACJA";
-        localStorage.setItem('wstazka', wstazka);
-        wyswietlWstazke(wstazka);
-        os_Optyczna.splice(id, 1);
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        odswiez_os_optyczna();
-        localStorage.setItem('id_Obiektu', -1);
-        usunWstazkeWlasciwosci();
-        main();
-    });
-
-    document.getElementById('F-zaawansowane').addEventListener("click", function(){
-        document.getElementById('okno-zaawansowane').style.display = "block";
-    });
-}
-
-function EventPromS(id){
-
-    document.getElementById('nazwa').addEventListener("input", function(){
-        os_Optyczna[id].nazwa = this.value;
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('wspx').addEventListener("input", function(){
-        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "wspx")){
-            os_Optyczna[id].wspx = parseFloat(this.value) || 0;
-        }
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('wspy').addEventListener("input", function(){
-        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "wspy")){
-            os_Optyczna[id].wspy = parseFloat(this.value) || 0;
-        }
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('alfa').addEventListener("input", function(){
-        if(sprawdzZgodnoscDanych(parseFloat(this.value) || 0 ,  "alfa")){
-            os_Optyczna[id].alfa = parseFloat(this.value) || 0;
-        }
-        localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-        rysuj();
-    });
-
-    document.getElementById('usun').addEventListener("click", function(){
-        usunObject(id);
-    });
 }
 
 function usunObject(id){
@@ -1330,37 +1486,9 @@ function sprawdzWspolrzedne(x, y){
     let cosZadzialo = 0;
     for(let i=0;i<os_Optyczna.length;i++){
         if(id_Obiektu==i){
-            if(os_Optyczna[i].typ=="SoczS"){
-            if(x>=os_Optyczna[i].wspx+20-margines&&x<=os_Optyczna[i].wspx+40+margines&&y>= WYSOKOSC/2-40-margines&&y<= WYSOKOSC/2-20+margines){
-                zmienWspx(i, x, y, "wspx", "SoczS");
-                cosZadzialo=1;
-                break;
-            }
-            else if(x<=os_Optyczna[i].wspx+40+margines&&x>=os_Optyczna[i].wspx+20-margines&&y>=WYSOKOSC/2-os_Optyczna[i].h-margines&&y<= WYSOKOSC/2-os_Optyczna[i].h+20+margines){
-                zmienWspx(i, x, y, "h", "SoczS");
-                cosZadzialo=1;
-                break;
-            }
-            else if(x>=os_Optyczna[i].wspx+os_Optyczna[i].F-10-margines&&x<=os_Optyczna[i].wspx+os_Optyczna[i].F+10+margines&&y<= WYSOKOSC/2+90+margines&&y>=WYSOKOSC/2+70-margines){
-                zmienWspx(i, x, y, "F", "SoczS");
-                cosZadzialo=1;
-                break;
-            }
+            cosZadzialo = os_Optyczna[i].klikniety(x, y);
         }
-        else if(os_Optyczna[i].typ=="PromS"){
-            if(x>=os_Optyczna[i].wspx-margines&&x<=os_Optyczna[i].wspx+margines&&y>= os_Optyczna[i].wspy+15-margines&&y<= os_Optyczna[i].wspy+25+margines){
-                zmienWspx(i, x, y, "wspXY", "PromS");
-                cosZadzialo=1;
-                break;
-            }
-            else if(x>=os_Optyczna[i].wspx +50*Math.cos(os_Optyczna[i].alfa*Math.PI/180)-5-margines&&x<=os_Optyczna[i].wspx +50*Math.cos(os_Optyczna[i].alfa*Math.PI/180)+5+margines&&y>= os_Optyczna[i].wspy - 50*Math.sin(os_Optyczna[i].alfa*Math.PI/180)-5-margines&&y<= os_Optyczna[i].wspy - 50*Math.sin(os_Optyczna[i].alfa*Math.PI/180)+5+margines){
-                zmienWspx(i, x, y, "alfa", "PromS");
-                cosZadzialo=1;
-                break;
-            }
-        }
-        }
-        if(czykliknal(x, y, i)){
+        if(os_Optyczna[i].czyKliknal(x, y)){
             wyswietlWstazke("WŁAŚCIWOŚCI", i);
             localStorage.setItem('id_Obiektu', i);
             cosZadzialo=1;
@@ -1375,30 +1503,9 @@ function sprawdzWspolrzedne(x, y){
     }
 }
 
-function czykliknal(x, y, i){
-    if(os_Optyczna[i].typ=="PromS"){
-        return czykliknalPromien(x, y, i);
-    }
-    else{
-        return czykliknalSoczewke(x, y, i);
-    }
-}
-
-function czykliknalSoczewke(x, y, i){
-    if(os_Optyczna[i].wspx-x<-1*margines||os_Optyczna[i].wspx-x>margines)   return false;
-    if(y>os_Optyczna[i].h+WYSOKOSC/2+margines||y<-1*os_Optyczna[i].h+WYSOKOSC/2-margines)   return false;
-    return true;
-}
-
-function czykliknalPromien(x, y, i){
-    if(os_Optyczna[i].wspx-x<-1*margines||os_Optyczna[i].wspx-x>margines)   return false;
-    if(os_Optyczna[i].wspy-y<-1*margines||os_Optyczna[i].wspy-y>margines)   return false;
-    return true;
-}
-
 /// przesuwanie myszą obiektów
 
-function zmienWspx(id, startX, startY, zmienna, typ) {
+function zmienWspx(id, startX, startY, zmienna) {
     if (isFunctionActive) {
         return; 
       }
@@ -1411,18 +1518,9 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
         return;
       }
 
-    let prevWspX, prevh, prevF, preva, prevWspY;
+    let prev;
 
-    if(typ=="SoczS"){
-        prevWspX = os_Optyczna[id].wspx;
-        prevh = os_Optyczna[id].h;
-        prevF = os_Optyczna[id].F;
-    }
-    else{
-        preva = os_Optyczna[id].alfa;
-        prevWspY = os_Optyczna[id].wspy;
-        prevWspX = os_Optyczna[id].wspx;  
-    }
+    prev = os_Optyczna[id].prev();
 
     let prevMouseX = startX;
     let prevMouseY = startY;
@@ -1435,15 +1533,15 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
       prevMouseX = event.clientX;
       prevMouseY = event.clientY-(window.innerHeight*0.2);
       
-      if(zmienna==="wspx")  os_Optyczna[id].wspx += dx;
-      else if(zmienna ==="h")   os_Optyczna[id].h -= dy;
-      else if(zmienna ==="F")   os_Optyczna[id].F += dx;
-      else if(zmienna === "wspXY") {os_Optyczna[id].wspy += dy; os_Optyczna[id].wspx += dx;}
+      if(zmienna==="wspx")  os_Optyczna[id].wspx = os_Optyczna[id]._wspx + dx;
+      else if(zmienna ==="h")   os_Optyczna[id].h = os_Optyczna[id]._h - dy;
+      else if(zmienna ==="F")   os_Optyczna[id].F = dx + os_Optyczna[id]._F;
+      else if(zmienna === "wspXY") {os_Optyczna[id].wspy = os_Optyczna[id]._wspy + dy; os_Optyczna[id].wspx =os_Optyczna[id]._wspx + dx;}
       else if(zmienna === "alfa"){
-        if(prevWspX-event.clientX<0){
-            os_Optyczna[id].alfa = -Math.atan((prevWspY-event.clientY)/(prevWspX-event.clientX))*180/Math.PI;
+        if(prev[0]-event.clientX<0){
+            os_Optyczna[id]._alfa = -Math.atan((prev[1]-event.clientY)/(prev[0]-event.clientX))*180/Math.PI;
         }else{
-            os_Optyczna[id].alfa =180 -Math.atan((prevWspY-event.clientY)/(prevWspX-event.clientX))*180/Math.PI;
+            os_Optyczna[id]._alfa =180 -Math.atan((prev[1]-event.clientY)/(prev[0]-event.clientX))*180/Math.PI;
         }
       } 
 
@@ -1461,30 +1559,6 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
     function clickHandler(event) {
         removeListeners();
         isFunctionActive = false;
-        if(typ=="SoczS"){
-            if(sprawdzZgodnoscDanych(os_Optyczna[id].wspx, "wspx")&&sprawdzZgodnoscDanych(os_Optyczna[id].h, "h")&&sprawdzZgodnoscDanych(os_Optyczna[id].F, "F")){
-
-            }
-            else{
-                os_Optyczna[id].wspx = prevWspX;
-                os_Optyczna[id].F = prevF;
-                os_Optyczna[id].h = prevh;
-
-                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            }
-        }
-        else{
-            if(sprawdzZgodnoscDanych(os_Optyczna[id].wspx, "wspx")&&sprawdzZgodnoscDanych(os_Optyczna[id].wspy, "wspy")&&sprawdzZgodnoscDanych(os_Optyczna[id].alfa, "alfa")){
-                
-            }
-            else{
-                os_Optyczna[id].wspx = prevWspX;    
-                os_Optyczna[id].wspy = prevWspY;    
-                os_Optyczna[id].alfa = preva; 
-                 
-                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            }
-        }
         rysuj();
     }
     
@@ -1492,16 +1566,7 @@ function zmienWspx(id, startX, startY, zmienna, typ) {
       if (event.key === 'Escape') {
         removeListeners();
 
-        if(typ=="SoczS"){
-        os_Optyczna[id].wspx = prevWspX;
-        os_Optyczna[id].F = prevF;
-        os_Optyczna[id].h = prevh;
-        }
-        else{
-            os_Optyczna[id].wspx = prevWspX;    
-            os_Optyczna[id].wspy = prevWspY;    
-            os_Optyczna[id].alfa = preva;  
-        }
+        os_Optyczna[id].wrocPrev(prev);
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         isFunctionActive = false;
         rysuj();
