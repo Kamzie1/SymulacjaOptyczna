@@ -112,7 +112,7 @@ p{
     align-items: center;
 }
 
-.uruchom, .reset, .wyczysc, .pokaz-ogniskowe, .pokaz-grid, .usun, .skupiajaca, .promien-swietlny, .F-zaawansowane{
+.uruchom, .reset, .wyczysc, .pokaz-ogniskowe, .pokaz-grid, .usun, .skupiajaca, .rozpraszajaca, .promien-swietlny, .F-zaawansowane{
     height: 70%;
     width:20%;
 }

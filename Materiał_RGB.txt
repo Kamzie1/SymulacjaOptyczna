@@ -1,6 +1,0 @@
-Materiał / Ośrodek	Współczynnik załamania (n)	
-Powietrze	~1.0003	(135, 206, 235)	
-Woda	1.33	(64, 164, 223)	
-Olej roślinny	~1.47	(255, 204, 102)	
-Szkło okienne / kryształ	~1.52	(200, 230, 255)	
-Diament	2.42	(240, 248, 255)	
