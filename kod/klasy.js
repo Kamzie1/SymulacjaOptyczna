@@ -89,7 +89,7 @@ export class Soczewka extends Optyka{
         <div class ="h">
             <form>
                 <label for='h'>Wysokość soczewki: </label>
-                <input type='number' id='h' placeholder='podaj h:' value=${this._h}
+                <input type='number' id='h' placeholder='podaj h:' value=${this._h}>
             </form>
         </div>
         <div class='optyka' id='optyka'>
@@ -108,7 +108,6 @@ export class Soczewka extends Optyka{
             </div>
             <span>Zaawansowane</span>
         </div>`;
-        dodajEventy();
     }
 
     dodajEventy(id){
@@ -286,7 +285,6 @@ export class Promien extends ZrodloSwiatla{
             </div>
             <span>Usuwanie</span>
         </div>`;
-        dodajEventy(id);
     }
 
     dodajEventy(id){
@@ -348,8 +346,8 @@ export class Promien extends ZrodloSwiatla{
     }
 
     Symuluj(){
-    let obiektyOptyczne = os_Optyczna.filter(filter);
-    let a, b, xo, yo, y_pomo, b_pomo, kierunek, Py, Pmin;
+    let obiektyOptyczne = os_Optyczna.filter(obj => obj.filter());
+    let a, b, xo, yo, kierunek, Py, Pmin;
 
     if(this._alfa-360*Math.floor(this._alfa/360)<=270&&this._alfa-360*Math.floor(this._alfa/360)>=90){
         kierunek=-1;

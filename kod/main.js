@@ -1091,7 +1091,7 @@ function zaladujWlasciwosciSoczewki(id){
                         <div class ="h">
                             <form>
                                 <label for='h'>Wysokość soczewki: </label>
-                                <input type='number' id='h' placeholder='podaj h:' value=${os_Optyczna[id].h}
+                                <input type='number' id='h' placeholder='podaj h:' value=${os_Optyczna[id].h}>
                             </form>
                         </div>
                         <div class='optyka' id='optyka'>
