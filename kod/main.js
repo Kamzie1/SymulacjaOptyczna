@@ -660,11 +660,11 @@ document.addEventListener("keydown", function(event) {
     else if (key === "Escape") esc();
     else if (ifNazwa==1) Wpisz(key);
     else if (key === "Enter") Enter();
-    else if (key === "r") rysuj();
     else if (key === "Delete") deleteObject(id_Obiektu);
     else if (key === " " || event.code === "Space") Ogniskowe(wstazka);
     else if (key === "g") Grid(wstazka);
     else if (key === "s") zaktualizujOs(SoczewkaSkupiajaca);
+    else if (key === "r") zaktualizujOs(SoczewkaRozpraszajaca);
     else if (key === "p") zaktualizujOs(Promien);
     else if (key>="0" && key <="9" ||key===".") Wpisz(key);
     else if (key === "o") wybierzObjekt();
@@ -1353,7 +1353,6 @@ function zaktualizujOs(obiekt) {
 
     localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
     wyswietlWstazke("WŁAŚCIWOŚCI", os_Optyczna.length - 1);
-    console.log(obiekt);
     rysuj();
 }
 

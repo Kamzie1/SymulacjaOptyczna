@@ -24,7 +24,9 @@ W - przełącz na wstążkę WŁAŚCIOWŚCI
 
 q - wyjdź z obiektu
 
-s - dodaj soczewkę
+s - dodaj soczewkę skupiającą
+
+r - dodaj soczewkę rozszerzającą
 
 p - dodaj promień
 
@@ -32,11 +34,9 @@ Enter - uruchom symulacje / Policz zaawansowane
 
 z - pokaż okno zaawansowane
 
-r - reset symulacji
-
 delete - usuwa wszystko, lub gdy jesteś na konkretnym obiekcie to ten obiekt usuwa
 
-esc - wychodzi z trybu wpisywania liczb, wychodzi z okna zaawansowane i wychodzi z trybu przesuwania myszą(cofa do ustawień początkowych)
+esc - wychodzi z trybu wpisywania liczb, wychodzi z okna zaawansowane i wychodzi z trybu przesuwania myszą(cofa do ustawień początkowych), reset symulacji
 
 Skróty na końcu podanej liczby (19 o)
 
