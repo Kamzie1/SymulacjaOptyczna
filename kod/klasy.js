@@ -1,4 +1,164 @@
+import {ctx, WYSOKOSC, SZEROKOSC, kontener, j, zaladujAktualneId, id_Obiektu} from './dane.js';
+
 /// deklaracja klas
+const epsilon = 1e-10;
+const margines = 10;
+let os_OptycznaKlas;
+function zaladujOs(){
+    if(localStorage.getItem('os_Optyczna'))
+    {
+        os_OptycznaKlas = JSON.parse(localStorage.getItem('os_Optyczna'));
+        os_OptycznaKlas = os_OptycznaKlas.map(obj => {
+            if (obj._typ === "SoczewkaSkupiajaca") return Object.assign(new SoczewkaSkupiajaca(), obj);
+            if (obj._typ === "Promien") return Object.assign(new Promien(), obj);
+    });
+    }
+    else
+    {
+        os_OptycznaKlas =[];
+        localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+    }
+}
+
+let pokazOgniskoweRysuj = 0;
+let pokazGridRysuj = 0;
+
+function zaladujOgniskowe(){
+    if(localStorage.getItem('pokazOgniskowe'))
+    {
+        pokazOgniskoweRysuj = localStorage.getItem('pokazOgniskowe');
+    }
+}
+
+function zaladujGrid(){
+    if(localStorage.getItem('pokazGrid'))
+    {
+        pokazGridRysuj = localStorage.getItem('pokazGrid');
+    }
+}
+
+export function rysuj(){
+    zaladujOs();
+    zaladujGrid();
+    zaladujOgniskowe();
+    ctx.clearRect(0, 0, SZEROKOSC, WYSOKOSC);
+    
+    rysuj_os();
+    rysuj_obiekty();
+    rysujObiektyPomocnicze();
+
+}
+
+export function rysuj_os(){
+    ctx.beginPath();
+    ctx.lineWidth=3;
+
+    ctx.moveTo(0,WYSOKOSC/2);
+    ctx.lineTo(SZEROKOSC, WYSOKOSC/2);
+
+    ctx.stroke();
+}
+
+export function rysuj_obiekty(){
+    for(let i=0;i<os_OptycznaKlas.length; i++)
+        {
+            zaladujAktualneId();
+            console.log("os_Optyczna:", os_OptycznaKlas);
+            console.log("id:", id_Obiektu);
+            console.log("os_Optyczna[id]:", os_OptycznaKlas[id_Obiektu]);
+            console.log("os_Optyczna[id].wyswietl:", os_OptycznaKlas[id_Obiektu]?.wyswietl(id_Obiektu));
+            os_OptycznaKlas[i].rysuj();
+        }
+}
+
+export function rysujObiektyPomocnicze(){
+    if(pokazOgniskoweRysuj==1)
+    {
+        rysujOgniskowe();
+    }
+    if(pokazGridRysuj==1)
+    {
+        rysujGrid();
+    }
+}
+
+export function rysujGrid(){
+    let odl=j;
+
+    ctx.beginPath();
+
+    rysujOsPionowa(odl);
+    rysujOsPozioma(odl);
+
+    ctx.stroke();
+}
+
+export function rysujOsPionowa(odl){
+    while(odl<=SZEROKOSC){
+
+        ctx.moveTo(odl,WYSOKOSC/2);
+
+        if(odl%100==0)
+        {
+            ctx.lineWidth=2;
+
+            ctx.moveTo(odl,WYSOKOSC/2+7.5);
+            ctx.lineTo(odl,WYSOKOSC/2-7.5);
+
+            ctx.font = "0.8vw Arial";
+            ctx.fillText(`${odl}`,odl,WYSOKOSC/2+7.5+15);
+        }
+        else{
+            ctx.lineWidth=1;
+
+            ctx.moveTo(odl,WYSOKOSC/2+3.75);
+            ctx.lineTo(odl,WYSOKOSC/2-3.75);
+
+            ctx.font = "0.6vw Arial";
+            ctx.fillText(`${odl}`,odl,WYSOKOSC/2+7.5+12);
+        }
+
+        odl+=50;
+    }
+}
+
+export function rysujOsPozioma(odl){
+    while(odl<=WYSOKOSC){
+
+        ctx.moveTo(0,odl);
+
+        if(odl%100==0)
+        {
+            ctx.lineWidth=2;
+
+            ctx.lineTo(7.5,odl);
+
+            ctx.font = "0.8vw Arial";
+            ctx.fillText(`${odl}`,7.5+15,odl);
+        }
+        else{
+            ctx.lineWidth=1;
+
+            ctx.lineTo(3.75,odl);
+
+            ctx.font = "0.6vw Arial";
+            ctx.fillText(`${odl}`,3.75+12,odl);
+        }
+        odl+=50;
+    }
+}
+
+export function rysujOgniskowe(){
+
+    for(let i=0;i<os_OptycznaKlas.length;i++){
+
+        if(!os_OptycznaKlas[i].filter()) continue;
+
+        os_OptycznaKlas[i].rysujOgniskowe();
+    }
+
+}
+
 
 export class Obiekt {
     constructor() {
@@ -28,6 +188,7 @@ export class Obiekt {
 export class Optyka extends Obiekt{
     constructor(){
         super();
+        this.typ=="Optyka";
     }
 
     filter(){
@@ -51,27 +212,8 @@ export class Soczewka extends Optyka{
         this._h = WYSOKOSC/4;
     }
 
-    set wspx(x){
-        if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
-            this._wspx = x;
-    }
-
-    set h(x){
-        if(x<=WYSOKOSC/2&&x>=0&&!Number.isNaN(x))
-            this._h = x;
-    }
-
-    set F(x){
-        if(x!=0&&!Number.isNaN(x))
-            this._F = x;
-    }
-
     wyswietl(id){
-        wypelnijWstazke();
-        dodajEventy(id);
-    }
-
-    wypelnijWstazke(){
+        zaladujOs();
         kontener.innerHTML=`<div class="dane">
         <div class="kontener-przyciskow">
         <div class='nazwa'>
@@ -108,31 +250,29 @@ export class Soczewka extends Optyka{
             </div>
             <span>Zaawansowane</span>
         </div>`;
-    }
 
-    dodajEventy(id){
         document.getElementById('nazwa').addEventListener("input", function(){
-            os_Optyczna[id].nazwa = this.value;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            rysuj();
+            os_OptycznaKlas[id].nazwa = this.value;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+            os_OptycznaKlas[id].rysuj();
         });
     
         document.getElementById('wspx').addEventListener("input", function(){
-            os_Optyczna[id].wspx = parseFloat(this.value) || 0;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+            os_OptycznaKlas[id].wspx = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
             rysuj();
         });
     
         document.getElementById('h').addEventListener("input", function(){
-            os_Optyczna[id].h = parseFloat(this.value) || 0;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            rysuj();
+            os_OptycznaKlas[id].h = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+            os_OptycznaKlas[id].rysuj();
         });
     
         document.getElementById('F').addEventListener("input", function(){
-            os_Optyczna[id].F = parseFloat(this.value) || 0;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            rysuj();
+            os_OptycznaKlas[id].F = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+            os_OptycznaKlas[id].rysuj();
         });
     
         document.getElementById('usun').addEventListener("click", function(){
@@ -148,6 +288,21 @@ export class Soczewka extends Optyka{
         document.getElementById('F-zaawansowane').addEventListener("click", function(){
             document.getElementById('okno-zaawansowane').style.display = "block";
         });
+    }
+
+    set wspx(x){
+        if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+            this._wspx = x;
+    }
+
+    set h(x){
+        if(x<=WYSOKOSC/2&&x>=0&&!Number.isNaN(x))
+            this._h = x;
+    }
+
+    set F(x){
+        if(x!=0&&!Number.isNaN(x))
+            this._F = x;
     }
 
     czyKliknal(x, y){
@@ -166,6 +321,24 @@ export class Soczewka extends Optyka{
         if(WYSOKOSC/2+this._h<Py)  return false;
         if(WYSOKOSC/2-this._h>Py)  return false;
         return true;
+    }
+
+    rysujOgniskowe(){
+        ctx.beginPath();
+        ctx.lineWidth=3;
+        ctx.font = "1.5vw Arial bold";
+
+        ctx.moveTo(this._wspx-this._F, WYSOKOSC/2-10);
+        ctx.lineTo(this._wspx-this._F, WYSOKOSC/2+10);
+
+        ctx.fillText(`F${this._nazwa}`,this._wspx-this._F, WYSOKOSC/2+10+50);
+
+        ctx.moveTo(this._wspx+this._F, WYSOKOSC/2-10);
+        ctx.lineTo(this._wspx+this._F, WYSOKOSC/2+10);
+
+        ctx.fillText(`F${this._nazwa}`,this._wspx+this._F, WYSOKOSC/2+10+50);
+
+        ctx.stroke();
     }
 }
 
@@ -234,22 +407,8 @@ export class Promien extends ZrodloSwiatla{
         this._alfa = 0;
     }
 
-    set wspx(x){
-        if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
-            this._wspx = x;
-    }
-
-    set wspy(x){
-        if(x<=WYSOKOSC&&x>=0&&!Number.isNaN(x))
-            this._wspy = x;
-    }
-    
     wyswietl(id){
-        wypelnijWstazke();
-        dodajEventy(id);
-    }
-
-    wypelnijWstazke(){
+        zaladujOs();
         kontener.innerHTML=`<div class="dane">
         <div class="kontener-przyciskow">
         <div class='nazwa'>
@@ -285,31 +444,28 @@ export class Promien extends ZrodloSwiatla{
             </div>
             <span>Usuwanie</span>
         </div>`;
-    }
-
-    dodajEventy(id){
         document.getElementById('nazwa').addEventListener("input", function(){
-            os_Optyczna[id].nazwa = this.value;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            rysuj();
+            os_OptycznaKlas[id].nazwa = this.value;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+            os_OptycznaKlas[id].rysuj();
         });
     
         document.getElementById('wspx').addEventListener("input", function(){
-            os_Optyczna[id].wspx = parseFloat(this.value) || 0;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            rysuj();
+            os_OptycznaKlas[id].wspx = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+            os_OptycznaKlas[id].rysuj();
         });
     
         document.getElementById('wspy').addEventListener("input", function(){
-            os_Optyczna[id].wspy = parseFloat(this.value) || 0;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            rysuj();
+            os_OptycznaKlas[id].wspy = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+            os_OptycznaKlas[id].rysuj();
         });
     
         document.getElementById('alfa').addEventListener("input", function(){
-            os_Optyczna[id]._alfa = parseFloat(this.value) || 0;
-            localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            rysuj();
+            os_OptycznaKlas[id]._alfa = parseFloat(this.value) || 0;
+            localStorage.setItem('os_Optyczna', JSON.stringify(os_OptycznaKlas));
+            os_OptycznaKlas[id].rysuj();
         });
     
         document.getElementById('usun').addEventListener("click", function(){
@@ -322,6 +478,18 @@ export class Promien extends ZrodloSwiatla{
             main();
         });
     }
+
+    set wspx(x){
+        if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+            this._wspx = x;
+    }
+
+    set wspy(x){
+        if(x<=WYSOKOSC&&x>=0&&!Number.isNaN(x))
+            this._wspy = x;
+    }
+
+
 
     czyKliknal(x, y){
         if(this._wspx-x<-1*margines||this._wspx-x>margines)   return false;
@@ -346,7 +514,8 @@ export class Promien extends ZrodloSwiatla{
     }
 
     Symuluj(){
-    let obiektyOptyczne = os_Optyczna.filter(obj => obj.filter());
+    zaladujOs();
+    let obiektyOptyczne = os_OptycznaKlas.filter(obj => obj.filter());
     let a, b, xo, yo, kierunek, Py, Pmin;
 
     if(this._alfa-360*Math.floor(this._alfa/360)<=270&&this._alfa-360*Math.floor(this._alfa/360)>=90){
