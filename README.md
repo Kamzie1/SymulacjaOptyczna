@@ -26,7 +26,7 @@ q - wyjdź z obiektu
 
 s - dodaj soczewkę skupiającą
 
-r - dodaj soczewkę rozszerzającą
+r - dodaj soczewkę rozpraszającą
 
 p - dodaj promień
 
