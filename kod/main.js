@@ -242,6 +242,7 @@ class Soczewka extends Optyka{
             zmienWspx(this._id, x, y, "F", "SoczS");
             return 1;
         }
+        return 0;
     }
 }
 
@@ -563,6 +564,7 @@ class Promien extends ZrodloSwiatla{
             zmienWspx(this._id, x, y, "alfa");
             return 1;
         }
+        return 0;
     }
 
 }
@@ -1333,7 +1335,7 @@ function dodajEventTworzenia(){
         zaktualizujOs(SoczewkaSkupiajaca);
     });
 
-    document.getElementById('skupiajaca').addEventListener('click', function(){
+    document.getElementById('rozpraszajaca').addEventListener('click', function(){
         zaktualizujOs(SoczewkaRozpraszajaca);
     });
     
