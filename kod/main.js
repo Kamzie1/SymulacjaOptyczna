@@ -592,10 +592,20 @@
     class ZwierciadloWklesle extends Zwierciadlo{
         constructor(){
             super();
-            this._typ = "Zwierciadlo";
+            this._typ = "ZwierciadloWklesle";
             this._nazwa = "ZWk";
             this._a1 = 90;
             this._a2 = 270;
+        }
+    }
+
+    class ZwierciadloWypukle extends Zwierciadlo{
+        constructor(){
+            super();
+            this._typ = "ZwierciadloWypukle";
+            this._nazwa = "ZWy";
+            this._a1 = 270;
+            this._a2 = 90;
         }
     }
 
@@ -789,16 +799,6 @@
     class Lustro extends Obudowa{
         constructor(){
             super();
-        }
-    }
-
-    class ZwierciadloWypukle extends Zwierciadlo{
-        constructor(){
-            super();
-            this._typ = "Zwierciadlo";
-            this._nazwa = "ZWy";
-            this._a1 = 270;
-            this._a2 = 90;
         }
     }
     
@@ -2033,20 +2033,19 @@
                         </div>
                         <span>Soczewki</span>
                     </div>
-                    <div class='zwierciadla'>
-                        <div class="kontener-przyciskow">
-                            <button class='zwierciadlo-wklesle' id='zwierciadlo-wklesle'><img height=100% width=100% src="img/wklesle.png"><span class="span-przycisk">Wklęsłe</span></button>
-                            <button class='zwierciadlo-wypukle' id='zwierciadlo-wypukle'><img height=100% width=100% src="img/wypukle.png"><span class="span-przycisk">Wypukłe</span></button>
-                        </div>
-                        <span>Zwierciadła</span>
-                    </div>
                     <div class='zrodla-swiatla'>
                         <div class="kontener-przyciskow">
                             <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Promień</span></button>
                             <button class='promien-swietlny' id='zarowka'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Żarówka</span></button>
                         </div>
                         <span>Żródła światła</span>
-                    </div>`;
+                    </div>`;/*                    <div class='zwierciadla'>
+                    <div class="kontener-przyciskow">
+                        <button class='zwierciadlo-wklesle' id='zwierciadlo-wklesle'><img height=100% width=100% src="img/wklesle.png"><span class="span-przycisk">Wklęsłe</span></button>
+                        <button class='zwierciadlo-wypukle' id='zwierciadlo-wypukle'><img height=100% width=100% src="img/wypukle.png"><span class="span-przycisk">Wypukłe</span></button>
+                    </div>
+                    <span>Zwierciadła</span>
+                </div>*/
         kontener.innerHTML= Tworzenie;
     }
     
@@ -2066,14 +2065,14 @@
         document.getElementById('zarowka').addEventListener('click', function(){
             zaktualizujOs(Zarowka);
         });
-
+/*
         document.getElementById('zwierciadlo-wklesle').addEventListener('click', function(){
             zaktualizujOs(ZwierciadloWklesle);
         });
 
         document.getElementById('zwierciadlo-wypukle').addEventListener('click', function(){
             zaktualizujOs(ZwierciadloWypukle);
-        });
+        });*/
     }
     
     function zaktualizujOs(obiekt) {  
