@@ -77,7 +77,7 @@ p{
     margin-left: 5px;
 }
 
-.sterowanie, .pokazywanie, .material,.soczewki, .zrodla-swiatla, .dod_przyciski, .dane, .zaawansowane-przycisk{
+.sterowanie, .pokazywanie, .material,.soczewki, .zrodla-swiatla, .dod_przyciski, .dane, .zaawansowane-przycisk, .zwierciadla{
     height:90%;
     border-right: 1px solid rgb(155, 155, 155);
     border-top: none; 
@@ -88,7 +88,7 @@ p{
     justify-content: space-between;
 }
 
-.sterowanie, .pokazywanie, .lista-obiektow, .soczewki, .zrodla-swiatla, .dod_przyciski, .zaawansowane-przycisk{
+.sterowanie, .pokazywanie, .lista-obiektow, .soczewki, .zrodla-swiatla, .dod_przyciski, .zaawansowane-przycisk, .zwierciadla{
     width:30%;
 }
 
@@ -112,7 +112,7 @@ p{
     align-items: center;
 }
 
-.uruchom, .reset, .wyczysc, .pokaz-ogniskowe, .pokaz-grid, .usun, .skupiajaca, .rozpraszajaca, .promien-swietlny, .F-zaawansowane{
+.uruchom, .reset, .wyczysc, .pokaz-ogniskowe, .pokaz-grid, .usun, .skupiajaca, .rozpraszajaca, .promien-swietlny, .F-zaawansowane, .zwierciadlo-wklesle, .zwierciadlo-wypukle{
     height: 70%;
     width:20%;
 }

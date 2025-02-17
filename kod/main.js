@@ -56,6 +56,10 @@
         wZasiegu(){
     
         }
+
+        rysujOgniskowe(){
+
+        }
     }
     
     class Soczewka extends Optyka{
@@ -90,6 +94,14 @@
         wyswietl(id){
             this.wypelnijWstazke();
             this.dodajEventy(id);
+        }
+
+        liczPx(a, b){
+            return this._wspx;   
+        }
+
+        liczPy(a, b, Px){
+            return a*Px+b;
         }
     
         wypelnijWstazke(){
@@ -139,19 +151,19 @@
             });
         
             document.getElementById('wspx').addEventListener("input", function(){
-                os_Optyczna[id]._wspx = parseFloat(this.value) || 0;
+                os_Optyczna[id].wspx = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('h').addEventListener("input", function(){
-                os_Optyczna[id]._h = parseFloat(this.value) || 0;
+                os_Optyczna[id].h = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('F').addEventListener("input", function(){
-                os_Optyczna[id]._F = parseFloat(this.value) || 0;
+                os_Optyczna[id].F = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
@@ -231,15 +243,15 @@
     
         klikniety(x, y){
             if(x>=this._wspx+20-margines&&x<=this._wspx+40+margines&&y>= WYSOKOSC/2-40-margines&&y<= WYSOKOSC/2-20+margines){
-                zmienWspx(this._id, x, y, "wspx", "SoczS");
+                zmienWspx(this._id, x, y, "wspx");
                 return 1;
             }
             else if(x<=this._wspx+40+margines&&x>=this._wspx+20-margines&&y>=WYSOKOSC/2-this._h-margines&&y<= WYSOKOSC/2-this._h+20+margines){
-                zmienWspx(this._id, x, y, "h", "SoczS");
+                zmienWspx(this._id, x, y, "h");
                 return 1;
             }
             else if(x>=this._wspx+this._F-10-margines&&x<=this._wspx+this._F+10+margines&&y<= WYSOKOSC/2+90+margines&&y>=WYSOKOSC/2+70-margines){
-                zmienWspx(this._id, x, y, "F", "SoczS");
+                zmienWspx(this._id, x, y, "F");
                 return 1;
             }
             return 0;
@@ -324,6 +336,469 @@
                 a = NaN;
             b = y_pomo-a*(this._wspx - (kierunek*this._F));
             return [a, b];
+        }
+    }
+
+    class Zwierciadlo extends Optyka{
+        constructor(){
+            super();
+            this._wspx = SZEROKOSC/2;
+            this._R = 200;
+
+        }
+
+        set wspx(x){    
+            if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+                this._wspx = x;
+        }
+
+        set R(x){
+            if(x>0&&!Number.isNaN(x))
+                this._R = x;
+        }
+
+        odswiez(){
+            this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
+            localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
+        }
+    
+        wyswietl(id){
+            this.wypelnijWstazke();
+            this.dodajEventy(id);
+        }
+    
+        wypelnijWstazke(){
+            kontener.innerHTML=`<div class="dane">
+            <div class="kontener-przyciskow">
+            <div class='wejscie'>
+                <form>  
+                    <label for='nazwa'>Nazwa: </label>
+                    <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${this._nazwa}>
+                </form>
+            </div>
+            <div class="wejscie">
+                <form>
+                    <label for='wspx'>Współrzędne: </label>
+                    <input type='number' id='wspx' placeholder='podaj wspx:' value=${this._wspx}>
+                </form>
+            </div>
+            <div class ="wejscie">
+                <form>
+                    <label for='R'>Promień Zwierciadła: </label>
+                    <input type='number' id='R' placeholder='podaj R:' value=${this._R}>
+                </form>
+            </div>
+            <div class='wejscie' id='kat1'>
+                <form>
+                    <label for='a1'>Kąt 1: </label>
+                    <input type='number' id='a1' placeholder='podaj a1:' value=${this._a1}>
+                </form>
+            </div>
+            <div class='wejscie' id='kat2'>
+                <form>
+                    <label for='a2'>Kąt 2: </label>
+                    <input type='number' id='a2' placeholder='podaj a1:' value=${this._a2}>
+                </form>
+            </div>
+            </div>
+            <span>Właściwości</span>
+            </div>
+            <div class='dod_przyciski' id='dod_przyciski'>
+                <div class="kontener-przyciskow">
+                    <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+                </div>
+                <span>Zaawansowane</span>
+            </div>`;
+        }
+    
+        dodajEventy(id){
+            document.getElementById('nazwa').addEventListener("input", function(){
+                os_Optyczna[id]._nazwa = this.value;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('wspx').addEventListener("input", function(){
+                os_Optyczna[id]._wspx = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('R').addEventListener("input", function(){
+                os_Optyczna[id]._R = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('a1').addEventListener("input", function(){
+                os_Optyczna[id]._a1 = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+
+            document.getElementById('a2').addEventListener("input", function(){
+                os_Optyczna[id]._a2 = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('usun').addEventListener("click", function(){
+                wyswietlWstazke("SYMULACJA");
+                os_Optyczna.splice(id, 1);
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                odswiez_os_optyczna();
+                localStorage.setItem('id_Obiektu', -1);
+                usunWstazkeWlasciwosci();
+                main();
+            });
+        }
+    
+        czyKliknal(x, y){
+            if((x-this._wspx)**2+(y-WYSOKOSC/2)**2<=(this._R+margines)**2&&(x-this._wspx)**2+(y-WYSOKOSC/2)**2>=(this._R-margines)**2&&this.dobrykat(x, y))   return true;
+            if(x<=this._wspx+5+margines&&x>=this._wspx-5-margines&&y<=5+WYSOKOSC/2+margines&&y>=WYSOKOSC/2-margines-5)   return true;
+            return false;
+        }
+
+        liczPx(a, b){
+            return rownanieKwadratowe(parseInt(1+a**2), parseInt(-2*this._wspx+2*a*b-2*a*WYSOKOSC/2),parseInt(this._wspx**2+b**2-2*b*WYSOKOSC/2+WYSOKOSC/2**2-this._R**2));
+        }
+
+        liczPy(a, b, Px){
+            return [a*Px[0]+b, a*Px[1]+b];
+        }
+
+        rysujElementyKontrolne (){
+            ctx.beginPath();
+            ctx.lineWidth=3;
+            ctx.arc(this._wspx+30, WYSOKOSC/2-30, 10, 0, 2 * Math.PI);
+            ctx.moveTo(this._wspx+this._R/2, WYSOKOSC/2+80);
+            ctx.arc(this._wspx+this._R/2, WYSOKOSC/2+80, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+    
+        wZasiegu(kierunek, xo, Px, Py){
+            console.log(Px, Py);
+            if(Number.isNaN(Px[0])&&Number.isNaN(Px[1])) return false;
+            console.log("w zasięgu!");
+            if(kierunek==1){
+                if(Px[0]>xo&&this.dobrykat(Px[0], Py[0]))    return true;
+                if(Px[1]>xo&&this.dobrykat(Px[1], Py[1]))    return true;
+            }
+            else{
+                if(Px[0]<xo&&this.dobrykat(Px[0], Py[0]))    return true;
+                if(Px[1]<xo&&this.dobrykat(Px[1], Py[1]))    return true;
+            }
+            console.log("poza zasięgiem!");
+            return false;
+        }
+
+        dobrykat(Px, Py){
+            let a = WYSOKOSC/2-Py;
+            let sinus = a/(2*this._R);
+            let alfa;
+            if(Px>this._wspx){
+                if(a<0){
+                    alfa = 180/Math.PI*Math.asin(sinus);
+                }
+                else{
+                    alfa = 360 - 180/Math.PI*Math.asin(sinus);
+                }
+            }
+            else{
+                if(a<0){
+                    alfa = 180 - 180/Math.PI*Math.asin(sinus);
+                }
+                else{
+                    alfa = 180+ 180/Math.PI*Math.asin(sinus);
+                }
+            }
+            console.log("R: ", this._R);
+            console.log("sinus: ", sinus);
+            console.log("a: ", a);
+            console.log("Px: ", Px);
+            console.log("Py: ", Py);
+            console.log(alfa);
+            if(this._a1<this._a2){
+                if(this._a1>=alfa||this._a2<=alfa)  return true;
+            }
+            else{
+                if((this._a1>=alfa&&this._a2<=alfa))  return true;
+            }
+
+            return false;
+        }
+    
+        rysujOgniskowe(){
+            ctx.beginPath();
+            ctx.lineWidth=3;
+            ctx.font = "1.5vw Arial bold";
+        
+            ctx.moveTo(this._wspx-this._R/2, WYSOKOSC/2-10);
+            ctx.lineTo(this._wspx-this._R/2, WYSOKOSC/2+10);
+        
+            ctx.fillText(`F${this._nazwa}`,this._wspx-this._R/2, WYSOKOSC/2+10+50);
+        
+            ctx.moveTo(this._wspx+this._R/2, WYSOKOSC/2-10);
+            ctx.lineTo(this._wspx+this._R/2, WYSOKOSC/2+10);
+        
+            ctx.fillText(`F${this._nazwa}`,this._wspx+this._R/2, WYSOKOSC/2+10+50);
+        
+            ctx.stroke();
+        }
+    
+        prev(){
+            return [this._wspx, this._R];
+        }
+    
+        wrocPrev(prev){
+            this.wspx = prev[0];
+            this.R = prev[1];
+        }
+
+        rysuj(){
+            ctx.beginPath();
+            ctx.lineWidth=2;
+        
+            ctx.arc(this._wspx, WYSOKOSC/2, this._R, this._a1*Math.PI/180, this._a2*Math.PI/180, true);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(this._wspx,WYSOKOSC/2);
+            ctx.arc(this._wspx, WYSOKOSC/2, 5, 0, 2*Math.PI);
+            ctx.fill();
+
+            ctx.stroke();
+        }
+    
+        zmienBiegPromienia(kierunek, a, b, xo, Px, Py){
+            return [a, b];
+        }
+
+        klikniety(x, y){
+            this._wspx+30, WYSOKOSC/2-30
+            if(x<=this._wspx+30+margines+5&&x>=this._wspx+30-5-margines&&y>=WYSOKOSC/2-35-margines&&y<=WYSOKOSC/2-30+5+margines){
+                zmienWspx(this._id, x, y, "wspx");
+                return 1;
+            } 
+            else if(x<=this._wspx+this._R/2+margines+5&&x>=this._wspx+this._R/2-5-margines&&y>=WYSOKOSC/2+80-5-margines&&y<=WYSOKOSC/2+80+5+margines){
+                zmienWspx(this._id, x, y, "R");
+                return 1;
+            }
+            return 0;
+        }
+    }
+
+    class ZwierciadloWklesle extends Zwierciadlo{
+        constructor(){
+            super();
+            this._typ = "Zwierciadlo";
+            this._nazwa = "ZWk";
+            this._a1 = 90;
+            this._a2 = 270;
+        }
+    }
+
+    class Obudowa extends Optyka{
+        constructor(){
+            this._wspx = SZEROKOSC/2;
+            this._wspy = WYSOKOSC/2;
+            this._h = WYSOKOSC/4;
+            this._alfa = 90;
+        }
+
+        set wspx(x){
+            if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+                this._wspx = x;
+        }
+
+        set wspy(x){
+            if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+                this._wspy = x;
+        }
+    
+        set h(x){
+            if(x<=WYSOKOSC/2&&x>=0&&!Number.isNaN(x))
+                this._h = x;
+        }
+    
+        odswiez(){
+            this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
+            this.wspy = this._wspy * (canvas.offsetWidth/SZEROKOSC);
+            this.h = this._h * (canvas.offsetHeight/WYSOKOSC);
+            localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
+        }
+    
+        wyswietl(id){
+            this.wypelnijWstazke();
+            this.dodajEventy(id);
+        }
+
+        liczPx(a, b){
+            return this._wspx;   
+        }
+
+        liczPy(a, b, Px){
+            return a*Px+b;
+        }
+    
+        wypelnijWstazke(){
+            kontener.innerHTML=`<div class="dane">
+            <div class="kontener-przyciskow">
+            <div class='nazwa'>
+                <form>  
+                    <label for='nazwa'>Nazwa: </label>
+                    <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${this._nazwa}>
+                </form>
+            </div>
+            <div class="wspx">
+                <form>
+                    <label for='wspx'>Współrzędne X: </label>
+                    <input type='number' id='wspx' placeholder='podaj wspx:' value=${this._wspx}>
+                </form>
+            </div>
+            <div class="wspy">
+                <form>
+                    <label for='wspy'>Współrzędne Y: </label>
+                    <input type='number' id='wspy' placeholder='podaj wspy:' value=${this._wspy}>
+                </form>
+            </div>
+            <div class ="h">
+                <form>
+                    <label for='h'>Wysokość soczewki: </label>
+                    <input type='number' id='h' placeholder='podaj h:' value=${this._h}>
+                </form>
+            </div>
+            <div class='optyka' id='optyka'>
+                <form>
+                    <label for='alfa'>alfa: </label>
+                    <input type='number' id='a' placeholder='podaj a:' value=${this._alfa}>
+                </form>
+            </div>
+            </div>
+            <span>Właściwości</span>
+            </div>
+            <div class='dod_przyciski' id='dod_przyciski'>
+                <div class="kontener-przyciskow">
+                    <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+                </div>
+                <span>Zaawansowane</span>
+            </div>`;
+        }
+    
+        dodajEventy(id){
+            document.getElementById('nazwa').addEventListener("input", function(){
+                os_Optyczna[id]._nazwa = this.value;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('wspx').addEventListener("input", function(){
+                os_Optyczna[id].wspx = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+
+            document.getElementById('wspy').addEventListener("input", function(){
+                os_Optyczna[id].wspy = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('h').addEventListener("input", function(){
+                os_Optyczna[id].h = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('alfa').addEventListener("input", function(){
+                os_Optyczna[id]._alfa = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('usun').addEventListener("click", function(){
+                wyswietlWstazke("SYMULACJA");
+                os_Optyczna.splice(id, 1);
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                odswiez_os_optyczna();
+                localStorage.setItem('id_Obiektu', -1);
+                usunWstazkeWlasciwosci();
+                main();
+            });
+        }
+    
+        czyKliknal(x, y){
+            if(this._wspx-x<-1*margines||this._wspx-x>margines)   return false;
+            if(y>this._h+WYSOKOSC/2+margines||y<-1*this._h+WYSOKOSC/2-margines)   return false;
+            return true;
+        }
+    
+        wZasiegu(kierunek, xo, Px, Py){
+            if(kierunek==1){
+                if(this._wspx<=xo)    return false;
+            }
+            else{
+                if(this._wspx>=xo)    return false;
+            }
+            if(WYSOKOSC/2+this._h<Py)  return false;
+            if(WYSOKOSC/2-this._h>Py)  return false;
+            return true;
+        }
+    
+        rysujElementyKontrolne(){
+            ctx.beginPath();
+            ctx.lineWidth=3;
+            ctx.arc(this._wspx+30, WYSOKOSC/2-30, 10, 0, 2 * Math.PI);
+            ctx.moveTo(this._wspx+30, WYSOKOSC/2-this._h+10);
+            ctx.arc(this._wspx+30, WYSOKOSC/2-this._h+10, 10, 0, 2 * Math.PI);
+            ctx.moveTo(this._wspx+this._F, WYSOKOSC/2+80);
+            ctx.arc(this._wspx+this._F, WYSOKOSC/2+80, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+    
+        prev(){
+            return [this._wspx,this._wspy, this._h, this._alfa];
+        }
+    
+        wrocPrev(prev){
+            this.wspx = prev[0];
+            this.wspy = prev[1];
+            this.h = prev[2];
+            this._alfa = prev[3];
+        }
+    
+        klikniety(x, y){
+            if(x>=this._wspx+20-margines&&x<=this._wspx+40+margines&&y>= WYSOKOSC/2-40-margines&&y<= WYSOKOSC/2-20+margines){
+                zmienWspx(this._id, x, y, "wspx");
+                return 1;
+            }
+            else if(x<=this._wspx+40+margines&&x>=this._wspx+20-margines&&y>=WYSOKOSC/2-this._h-margines&&y<= WYSOKOSC/2-this._h+20+margines){
+                zmienWspx(this._id, x, y, "h");
+                return 1;
+            }
+            else if(x>=this._wspx+this._F-10-margines&&x<=this._wspx+this._F+10+margines&&y<= WYSOKOSC/2+90+margines&&y>=WYSOKOSC/2+70-margines){
+                zmienWspx(this._id, x, y, "alfa");
+                return 1;
+            }
+            return 0;
+        }
+    }
+
+    class Lustro extends Obudowa{
+        constructor(){
+            super();
+        }
+    }
+
+    class ZwierciadloWypukle extends Zwierciadlo{
+        constructor(){
+            super();
+            this._typ = "Zwierciadlo";
+            this._nazwa = "ZWy";
+            this._a1 = 270;
+            this._a2 = 90;
         }
     }
     
@@ -470,7 +945,7 @@
     
         Symuluj(){
         let obiektyOptyczne = os_Optyczna.filter(obj => obj.filter());
-        let a, b, xo, yo, kierunek, Py, Pmin;
+        let a, b, xo, yo, kierunek, Px, Py, Pmin, Pminx;
     
         if(this._alfa-360*Math.floor(this._alfa/360)<=270&&this._alfa-360*Math.floor(this._alfa/360)>=90){
             kierunek=-1;
@@ -493,16 +968,18 @@
             let min = SZEROKOSC+100;
             let min_id = -1;
             for(let i=0;i<obiektyOptyczne.length;i++){
-                Py = a*obiektyOptyczne[i]._wspx + b;
+                Px = obiektyOptyczne[i].liczPx(a, b);
+                Py = obiektyOptyczne[i].liczPy(a, b, Px);
     
-                if(!obiektyOptyczne[i].wZasiegu(kierunek, xo, 0, Py)){
+                if(!obiektyOptyczne[i].wZasiegu(kierunek, xo, Px, Py)){
                     continue;
                 }
     
-                if(Math.abs(xo-obiektyOptyczne[i]._wspx)<min){
-                    min = Math.abs(xo-obiektyOptyczne[i]._wspx);
+                if(Math.abs(xo-Px)<min){
+                    min = Math.abs(xo-Px);
                     min_id = i;
                     Pmin = Py;
+                    Pminx = Px;
                 }
             }
     
@@ -525,8 +1002,8 @@
                 break;
             }
     
-            ctx.lineTo(obiektyOptyczne[min_id]._wspx, Pmin);
-            xo = obiektyOptyczne[min_id]._wspx;
+            ctx.lineTo(Pminx, Pmin);
+            xo = Pminx;
     
             [a, b] = obiektyOptyczne[min_id].zmienBiegPromienia(kierunek, a, b, xo, 0, Pmin);
     
@@ -568,6 +1045,228 @@
         }
     
     }
+
+    class Zarowka extends ZrodloSwiatla{
+        constructor(){
+            super();
+            this._typ = "Żarówka";
+            this._nazwa = "Zar";
+            this._wspx = SZEROKOSC/4;
+            this._wspy = WYSOKOSC/3;
+            this._promienie = 12;
+        }
+    
+        set wspx(x){
+            if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+                this._wspx = x;
+        }
+    
+        set wspy(x){
+            if(x<=WYSOKOSC&&x>=0&&!Number.isNaN(x))
+                this._wspy = x;
+        }
+        
+        odswiez(){
+            this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
+            this.wspy = this._wspy * (canvas.offsetHeight/WYSOKOSC);
+            localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
+        }
+    
+        wyswietl(id){
+            this.wypelnijWstazke();
+            this.dodajEventy(id);
+        }
+    
+        wypelnijWstazke(){
+            kontener.innerHTML=`<div class="dane">
+            <div class="kontener-przyciskow">
+            <div class='nazwa'>
+                <form>  
+                    <label for='nazwa'>Nazwa: </label>
+                    <input type='text' id='nazwa' placeholder='podaj nazwę:' value=${this._nazwa}>
+                </form>
+            </div>
+            <div class="wspx">
+                <form>
+                    <label for='wspx'>Współrzędne x: </label>
+                    <input type='number' id='wspx' placeholder='podaj wspx:' value=${this._wspx}>
+                </form>
+            </div>
+            <div class ="h">
+                <form>
+                    <label for='wspy'>Współrzędne y: </label>
+                    <input type='number' id='wspy' placeholder='podaj wspy:' value=${this._wspy}>
+                </form>
+            </div>
+            <div class='optyka' id='optyka'>
+                <form>
+                    <label for='promienie'>Liczba promieni: </label>
+                    <input type='number' id='promienie' placeholder='podaj liczbę:' value=${this._promienie}>
+                </form>
+            </div>
+            </div>
+            <span>Właściwości</span>
+            </div>
+            <div class='dod_przyciski' id='dod_przyciski'>
+                <div class="kontener-przyciskow">
+                    <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+                </div>
+                <span>Usuwanie</span>
+            </div>`;
+        }
+    
+        dodajEventy(id){
+            document.getElementById('nazwa').addEventListener("input", function(){
+                os_Optyczna[id]._nazwa = this.value;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('wspx').addEventListener("input", function(){
+                os_Optyczna[id]._wspx = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('wspy').addEventListener("input", function(){
+                os_Optyczna[id]._wspy = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('promienie').addEventListener("input", function(){
+                os_Optyczna[id]._promienie = parseFloat(this.value) || 0;
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                rysuj();
+            });
+        
+            document.getElementById('usun').addEventListener("click", function(){
+                wyswietlWstazke("SYMULACJA");
+                os_Optyczna.splice(this._id, 1);
+                localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
+                odswiez_os_optyczna();
+                localStorage.setItem('id_Obiektu', -1);
+                usunWstazkeWlasciwosci();
+                main();
+            });
+        }
+    
+        czyKliknal(x, y){
+            if(this._wspx-x<-1*margines-10||this._wspx-x>margines+10)   return false;
+            if(this._wspy-y<-1*margines-10||this._wspy-y>margines+10)   return false;
+            return true;
+        }
+    
+        rysuj(){
+        
+            ctx.beginPath();
+            ctx.lineWidth=2;
+        
+            ctx.moveTo(this._wspx, this._wspy);
+            ctx.arc(this._wspx, this._wspy, 20, 0, Math.PI * 2, true);
+        
+            ctx.stroke();
+        }
+    
+        Symuluj(){
+        let obiektyOptyczne = os_Optyczna.filter(obj => obj.filter());
+        let a, b, xo, yo, kierunek, Px, Py, Pmin, Pminx;
+    
+
+        for(let alfa=0;alfa<=360;alfa+=360/this._promienie)
+        {
+            if(alfa<=270&&alfa>=90){
+                kierunek=-1;
+            }
+            else{
+                kierunek=1;
+            }
+        
+            xo = this._wspx;
+            yo = this._wspy;
+        
+            a = Math.tan((Math.PI/180*(180-alfa)));
+            b = yo-a*xo;
+        
+            ctx.beginPath();
+            ctx.lineWidth=2;
+            ctx.moveTo(xo, yo);
+        
+            while(true){
+                let min = SZEROKOSC+100;
+                let min_id = -1;
+                for(let i=0;i<obiektyOptyczne.length;i++){
+                    Px = obiektyOptyczne[i].liczPx(a, b);
+                    Py = obiektyOptyczne[i].liczPy(a, b, Px);
+        
+                    if(!obiektyOptyczne[i].wZasiegu(kierunek, xo, Px, Py)){
+                        continue;
+                    }
+        
+                    if(Math.abs(xo-Px)<min){
+                        min = Math.abs(xo-Px);
+                        min_id = i;
+                        Pmin = Py;
+                        Pminx = Px;
+                    }
+                }
+        
+                if(min_id==-1){
+                    if(kierunek==1)
+                    {
+                        if(Math.abs(a)<epsilon)
+                            ctx.lineTo(SZEROKOSC, b);
+                        else{
+                            ctx.lineTo(SZEROKOSC+100, a*(SZEROKOSC+100)+b);
+                        }
+                    }
+                    else{
+                        if(Math.abs(a)<epsilon)
+                            ctx.lineTo(0, b);
+                        else
+                            ctx.lineTo( -100,a*(-100)+b);
+                    }
+                    ctx.stroke();
+                    break;
+                }
+        
+                ctx.lineTo(Pminx, Pmin);
+                xo = Pminx;
+        
+                [a, b] = obiektyOptyczne[min_id].zmienBiegPromienia(kierunek, a, b, xo, 0, Pmin);
+        
+            }
+        }
+        
+        }
+    
+        rysujElementyKontrolne(){
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+        
+            ctx.arc(this._wspx, this._wspy, 2, 0, 2 * Math.PI);
+        
+            ctx.fill();
+            ctx.stroke();
+        }
+    
+        prev(){
+            return [this._wspx, this._wspy];
+        }
+    
+        wrocPrev(prev){
+            this.wspx = prev[0];
+            this.wspy = prev[1];
+        }
+    
+        klikniety(x, y){
+            if(x>=this._wspx-2-margines&&x<=this._wspx+2+margines&&y>= this._wspy-2-margines&&y<= this._wspy+2+margines){
+                zmienWspx(this._id, x, y, "wspXY");
+                return 1;
+            }
+            return 0;
+        }
+    }
     
     /// zmienne globalne
     
@@ -585,7 +1284,14 @@
     const margines = 10;
     const kontener = document.getElementById("trescWstazki");
     
-    
+    function rownanieKwadratowe(a, b, c){
+        let delta = b**2-4*a*c;
+        if(delta<0) return NaN;
+        if(delta==0) return [-b/(2*a), -b/(2*a)];
+        return [(-b-Math.sqrt(delta))/(2*a), (-b+Math.sqrt(delta))/(2*a)];
+    }
+
+
     /// Główna pętla
     
     main();
@@ -665,12 +1371,15 @@
         else if (key === "g") Grid(wstazka);
         else if (key === "s") zaktualizujOs(SoczewkaSkupiajaca);
         else if (key === "r") zaktualizujOs(SoczewkaRozpraszajaca);
+        else if (key === "(") zaktualizujOs(ZwierciadloWypukle);
+        else if (key === ")") zaktualizujOs(ZwierciadloWklesle);
         else if (key === "p") zaktualizujOs(Promien);
         else if (key>="0" && key <="9" ||key===".") Wpisz(key);
         else if (key === "o") wybierzObjekt();
         else if (key === "x") zaktulizujZmienna("wspx", "obiekt", id_Obiektu);
         else if (key === "h") zaktulizujZmienna("h", "SoczS", id_Obiektu);
         else if (key === "F") zaktulizujZmienna("F", "SoczS", id_Obiektu);
+        else if (key === "R") zaktulizujZmienna("R", "Zw", id_Obiektu);
         else if (key === "y") zaktulizujZmienna("wspy", "PromS", id_Obiektu);
         else if (key === "a") zaktulizujZmienna("alfa", "PromS", id_Obiektu);
         else if (key === "S") wyswietlWstazke("SYMULACJA", id_Obiektu);
@@ -725,27 +1434,27 @@
             return;
         }
         else if(zmienna === "wspx"){
-            if(!sprawdzZgodnoscDanych(wpisywanie, "wspx")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
             os_Optyczna[id].wspx = wpisywanie;
         }
-        else if(typ === "PromS" && os_Optyczna[id].typ === "PromS"){
+        else if(typ === "PromS" && os_Optyczna[id]._typ === "PromS"){
             if(zmienna === "wspy"){
-                if(!sprawdzZgodnoscDanych(wpisywanie, "wspy")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
                 os_Optyczna[id].wspy = wpisywanie;
             }
             else if(zmienna === "alfa"){
-                if(!sprawdzZgodnoscDanych(wpisywanie, "alfa")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
-                os_Optyczna[id].alfa = wpisywanie;
+                os_Optyczna[id]._alfa = wpisywanie;
             }
         }
-        else if(typ === "SoczS" && os_Optyczna[id].typ === "SoczS"){
+        else if(typ === "SoczS" && os_Optyczna[id]._typ === "SoczS"){
             if(zmienna === "h"){
-                if(!sprawdzZgodnoscDanych(wpisywanie, "h")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
                 os_Optyczna[id].h = wpisywanie;
             }
             else if(zmienna === "F"){
-                if(!sprawdzZgodnoscDanych(wpisywanie, "F")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
                 os_Optyczna[id].F = wpisywanie;
+            }
+        }
+        else if(typ==="Zw"&& os_Optyczna[id]._typ === "Zwierciadlo"){
+            if(zmienna === "R"){
+                os_Optyczna[id].R = wpisywanie;
             }
         }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -922,7 +1631,10 @@
                 os_Optyczna = os_Optyczna.map(obj => {
                     if (obj._typ === "SoczewkaSkupiajaca") return Object.assign(new SoczewkaSkupiajaca(), obj);
                     if (obj._typ === "SoczewkaRozpraszajaca") return Object.assign(new SoczewkaRozpraszajaca(), obj);
+                    if (obj._typ === "ZwierciadloWklesle") return Object.assign(new ZwierciadloWklesle(), obj);
+                    if (obj._typ === "ZwierciadloWypukle") return Object.assign(new ZwierciadloWypukle(), obj);
                     if (obj._typ === "Promien") return Object.assign(new Promien(), obj);
+                    if (obj._typ === "Żarówka") return Object.assign(new Zarowka(), obj);
                     return obj;  
                 });
         }
@@ -1321,9 +2033,17 @@
                         </div>
                         <span>Soczewki</span>
                     </div>
+                    <div class='zwierciadla'>
+                        <div class="kontener-przyciskow">
+                            <button class='zwierciadlo-wklesle' id='zwierciadlo-wklesle'><img height=100% width=100% src="img/wklesle.png"><span class="span-przycisk">Wklęsłe</span></button>
+                            <button class='zwierciadlo-wypukle' id='zwierciadlo-wypukle'><img height=100% width=100% src="img/wypukle.png"><span class="span-przycisk">Wypukłe</span></button>
+                        </div>
+                        <span>Zwierciadła</span>
+                    </div>
                     <div class='zrodla-swiatla'>
                         <div class="kontener-przyciskow">
                             <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Promień</span></button>
+                            <button class='promien-swietlny' id='zarowka'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Żarówka</span></button>
                         </div>
                         <span>Żródła światła</span>
                     </div>`;
@@ -1341,6 +2061,18 @@
         
         document.getElementById('promien-swietlny').addEventListener('click', function(){
             zaktualizujOs(Promien);
+        });
+
+        document.getElementById('zarowka').addEventListener('click', function(){
+            zaktualizujOs(Zarowka);
+        });
+
+        document.getElementById('zwierciadlo-wklesle').addEventListener('click', function(){
+            zaktualizujOs(ZwierciadloWklesle);
+        });
+
+        document.getElementById('zwierciadlo-wypukle').addEventListener('click', function(){
+            zaktualizujOs(ZwierciadloWypukle);
         });
     }
     
@@ -1407,7 +2139,7 @@
     }
     
     function sprawdzZgodnoscDanych(x, typ){
-        if(typ!="alfa" && typ!="wspx" && typ!="wspy" && typ!="id"){
+        if(typ!="alfa" && typ!="wspx" && typ!="wspy" && typ!="id"&&typ!="F"&&typ!="R"){
             if(x<=0)    return false;
         }
         if(typ=="h"){
@@ -1537,6 +2269,7 @@
           if(zmienna==="wspx")  os_Optyczna[id].wspx = os_Optyczna[id]._wspx + dx;
           else if(zmienna ==="h")   os_Optyczna[id].h = os_Optyczna[id]._h - dy;
           else if(zmienna ==="F")   os_Optyczna[id].F = dx + os_Optyczna[id]._F;
+          else if(zmienna ==="R")   os_Optyczna[id].R = dx + os_Optyczna[id]._R;
           else if(zmienna === "wspXY") {os_Optyczna[id].wspy = os_Optyczna[id]._wspy + dy; os_Optyczna[id].wspx =os_Optyczna[id]._wspx + dx;}
           else if(zmienna === "alfa"){
             if(prev[0]-event.clientX<0){
