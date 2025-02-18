@@ -294,7 +294,7 @@
             else
                 a = NaN;
             b = y_pomo-a*(this._wspx + (kierunek*this._F));
-            return [a, b];
+            return [a, b, kierunek];
         }
     
     }
@@ -335,7 +335,7 @@
             else
                 a = NaN;
             b = y_pomo-a*(this._wspx - (kierunek*this._F));
-            return [a, b];
+            return [a, b, kierunek];
         }
     }
 
@@ -460,7 +460,7 @@
         }
 
         liczPx(a, b){
-            return rownanieKwadratowe(parseInt(1+a**2), parseInt(-2*this._wspx+2*a*b-2*a*WYSOKOSC/2),parseInt(this._wspx**2+b**2-2*b*WYSOKOSC/2+WYSOKOSC/2**2-this._R**2));
+            return rownanieKwadratowe(1+a**2,-2*this._wspx+2*a*b-2*a*WYSOKOSC/2,this._wspx**2 + b**2 - (2*b*WYSOKOSC/2) + (WYSOKOSC/2)**2 - this._R**2);
         }
 
         liczPy(a, b, Px){
@@ -478,52 +478,52 @@
         }
     
         wZasiegu(kierunek, xo, Px, Py){
-            console.log(Px, Py);
+            if(xo==Px)  return false;
+            let dziala = false;
             if(Number.isNaN(Px[0])&&Number.isNaN(Px[1])) return false;
-            console.log("w zasięgu!");
             if(kierunek==1){
-                if(Px[0]>xo&&this.dobrykat(Px[0], Py[0]))    return true;
-                if(Px[1]>xo&&this.dobrykat(Px[1], Py[1]))    return true;
+                if(!Number.isNaN(Px[0])&&Px[0]>xo&&this.dobrykat(Px[0], Py[0]))    dziala=true;
+                else    Px[0]=NaN;
+                if(!Number.isNaN(Px[1])&&Px[1]>xo&&this.dobrykat(Px[1], Py[1]))    dziala=true;
+                else    Px[1]=NaN;
             }
             else{
-                if(Px[0]<xo&&this.dobrykat(Px[0], Py[0]))    return true;
-                if(Px[1]<xo&&this.dobrykat(Px[1], Py[1]))    return true;
+                if(!Number.isNaN(Px[0])&&Px[0]<xo&&this.dobrykat(Px[0], Py[0]))    dziala=true;
+                else    Px[0]=NaN;
+                if(!Number.isNaN(Px[1])&&Px[1]<xo&&this.dobrykat(Px[1], Py[1]))    dziala=true;
+                else    Px[1]=NaN;
             }
-            console.log("poza zasięgiem!");
+            if(dziala==true)  return true;
             return false;
         }
 
         dobrykat(Px, Py){
-            let a = WYSOKOSC/2-Py;
-            let sinus = a/(2*this._R);
-            let alfa;
+            let alfa, sinus, a;
             if(Px>this._wspx){
+                a = Math.sqrt((Px-(this._wspx+this._R))**2+(Py-WYSOKOSC/2)**2);
+                sinus = a/(2*this._R);
                 if(a<0){
-                    alfa = 180/Math.PI*Math.asin(sinus);
+                    alfa = 2*(180/Math.PI*Math.asin(sinus));
                 }
                 else{
-                    alfa = 360 - 180/Math.PI*Math.asin(sinus);
+                    alfa = 360 - 2*(180/Math.PI*Math.asin(sinus));
                 }
             }
             else{
+                a = Math.sqrt((Px-(this._wspx-this._R))**2+(Py-WYSOKOSC/2)**2);
+                sinus = a/(2*this._R);
                 if(a<0){
-                    alfa = 180 - 180/Math.PI*Math.asin(sinus);
+                    alfa = 180 - 2*(180/Math.PI*Math.asin(sinus));
                 }
                 else{
-                    alfa = 180+ 180/Math.PI*Math.asin(sinus);
+                    alfa = 180+ 2*(180/Math.PI*Math.asin(sinus));
                 }
             }
-            console.log("R: ", this._R);
-            console.log("sinus: ", sinus);
-            console.log("a: ", a);
-            console.log("Px: ", Px);
-            console.log("Py: ", Py);
-            console.log(alfa);
             if(this._a1<this._a2){
-                if(this._a1>=alfa||this._a2<=alfa)  return true;
+                if(this._a1<=alfa&&this._a2>=alfa)  return true;
             }
             else{
-                if((this._a1>=alfa&&this._a2<=alfa))  return true;
+                if((this._a1<=alfa||this._a2>=alfa))  return true;
             }
 
             return false;
@@ -560,7 +560,7 @@
             ctx.beginPath();
             ctx.lineWidth=2;
         
-            ctx.arc(this._wspx, WYSOKOSC/2, this._R, this._a1*Math.PI/180, this._a2*Math.PI/180, true);
+            ctx.arc(this._wspx, WYSOKOSC/2, this._R, this._a2*Math.PI/180,this._a1*Math.PI/180, true);
             ctx.stroke();
 
             ctx.beginPath();
@@ -572,7 +572,45 @@
         }
     
         zmienBiegPromienia(kierunek, a, b, xo, Px, Py){
-            return [a, b];
+            let c;
+            if(kierunek==1){
+                if(Px>this._wspx){
+                    c = Math.sqrt((Px-(this._wspx+this._R))**2+(Py-WYSOKOSC/2)**2);
+                    return this.wklesle(a, b, xo, Px, Py, kierunek, c);
+                }
+                else{
+                    c = Math.sqrt((Px-(this._wspx-this._R))**2+(Py-WYSOKOSC/2)**2);
+                    return this.wypukle(a, b, xo, Px, Py, kierunek, c);
+                }
+            }
+            else{
+                if(Px>this._wspx){
+                    c = Math.sqrt((Px-(this._wspx+this._R))**2+(Py-WYSOKOSC/2)**2);
+                    return this.wypukle(a, b, xo, Px, Py, kierunek, c);
+                }
+                else{
+                    c = Math.sqrt((Px-(this._wspx-this._R))**2+(Py-WYSOKOSC/2)**2);
+                    return this.wklesle(a, b, xo, Px, Py, kierunek, c);
+                }
+            }
+        }
+
+        wypukle(a, b, xo, Px, Py, kierunek){
+            return [a, b, kierunek];
+        }
+
+        wklesle(a, b, xo, Px, Py, kierunek, c){
+            console.log("wklesle!!!");
+            let sinus_gamma = c/(2*this._R);
+            console.log(sinus_gamma);
+            let gamma = 2*180/Math.PI*Math.asin(sinus_gamma);
+            console.log(gamma);
+            let alfa = 180/Math.PI*Math.atan(a);
+            console.log(alfa);
+            a = Math.tan(Math.PI/180*(180-2*gamma+alfa));
+            b = Py-a*Px;
+            console.log(a, b, -kierunek);
+            return[a,b ,-kierunek];
         }
 
         klikniety(x, y){
@@ -594,8 +632,8 @@
             super();
             this._typ = "ZwierciadloWklesle";
             this._nazwa = "ZWk";
-            this._a1 = 90;
-            this._a2 = 270;
+            this._a1 = 270;
+            this._a2 = 90;
         }
     }
 
@@ -604,38 +642,121 @@
             super();
             this._typ = "ZwierciadloWypukle";
             this._nazwa = "ZWy";
-            this._a1 = 270;
-            this._a2 = 90;
+            this._a1 = 90;
+            this._a2 = 270;
         }
     }
 
     class Obudowa extends Optyka{
         constructor(){
+            super();
+            this._nazwa = "Ob";
+            this._typ = "Obudowa";
             this._wspx = SZEROKOSC/2;
             this._wspy = WYSOKOSC/2;
-            this._h = WYSOKOSC/4;
-            this._alfa = 90;
+            this._dl = WYSOKOSC/6;
+            this._alfa = 89;
+            this._a = Math.tan((Math.PI/180*(180-this._alfa)));
+            this._b = this._wspy-this._a*this._wspx;;
+
+            this._kierunek = 1;
+
+            [this._wspx2, this._wspy2] = this.liczWsp();
         }
 
         set wspx(x){
             if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
                 this._wspx = x;
+            this._b = this._wspy-this._a*this._wspx;
+            [this._wspx2, this._wspy2] = this.liczWsp();
         }
 
         set wspy(x){
-            if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+            if(x<=WYSOKOSC&&x>=0&&!Number.isNaN(x)) 
                 this._wspy = x;
+            this._b = this._wspy-this._a*this._wspx;
+            [this._wspx2, this._wspy2] = this.liczWsp();
         }
     
-        set h(x){
-            if(x<=WYSOKOSC/2&&x>=0&&!Number.isNaN(x))
-                this._h = x;
+        set dl(x){
+            if(x>=0&&!Number.isNaN(x))
+                this._dl = x;
+            [this._wspx2, this._wspy2] = this.liczWsp();
+        }
+
+        set wspx2(x){
+            if(x<=SZEROKOSC&&x>=0&&!Number.isNaN(x)) 
+                this._wspx2 = x;
+            this._b = this._wspy-this._a*this._wspx;
+            [this.dl, this.alfa, this._kierunek] = this.liczDl();
+        }
+
+        set wspy2(x){
+            if(x<=WYSOKOSC&&x>=0&&!Number.isNaN(x)) 
+                this._wspy2 = x;
+            this._b = this._wspy-this._a*this._wspx;
+            [this.dl, this.alfa, this._kierunek] = this.liczDl();
+        }
+
+        set alfa(x){
+            this._alfa = x;
+            if(x!=90||x!=270){
+                this._a = Math.tan((Math.PI/180*(180-this._alfa)));
+                this._b = this._wspy-this._a*this._wspx;
+                if(x-360*Math.floor(x/360)>90&&x-360*Math.floor(x/360)<270){
+                    this._kierunek=-1;
+                }
+                else{
+                    this._kierunek=1;
+                }
+            }
+            else if(x==90){
+                this._kierunek = 0;
+            }
+            else{
+                this._kierunek=-2;
+            }
+            [this._wspx2, this._wspy2] = this.liczWsp();
         }
     
+        liczDl(){
+            let kierunek;
+            let  kat;
+            if(this._wspx2<this._wspx){
+                kat = 180+180/Math.PI*Math.atan((this._wspy2-this._wspy)/(this._wspx2-this._wspx));
+                kierunek=-1;
+            }
+            else {
+                kat = 180/Math.PI*Math.atan((this._wspy2-this._wspy)/(this._wspx2-this._wspx));
+                kierunek=1;
+            }
+            return [Math.sqrt((this._wspx-this._wspx2)**2+(this._wspy-this._wspy2)**2),kat, kierunek];
+        }
+
+        liczWsp(){
+            let x = rownanieKwadratowe(1+this._a**2,-2*this._wspx+2*this._a*this._b-2*this._a*this._wspy,this._wspx**2 + this._b**2 - (2*this._b*this._wspy) + (this._wspy)**2 - this._dl**2);
+            let y = [this._a*x[0]+this._b, this._a*x[1]+this._b];
+            if(this._kierunek==1){
+                if(x[0]>x[1]){
+                    return [x[0], y[0]];
+                }
+                else{
+                    return [x[1], y[1]];
+                }
+            }
+            else{
+                if(x[0]>x[1]){
+                    return [x[1], y[1]];
+                }
+                else{
+                    return [x[0], y[0]];
+                }
+            }
+        }
+
         odswiez(){
             this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
-            this.wspy = this._wspy * (canvas.offsetWidth/SZEROKOSC);
-            this.h = this._h * (canvas.offsetHeight/WYSOKOSC);
+            this.wspy = this._wspy * (canvas.offsetWidth/WYSOKOSC);
             localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
         }
     
@@ -645,7 +766,7 @@
         }
 
         liczPx(a, b){
-            return this._wspx;   
+            return (b-this._b)/(-a+this._a);   
         }
 
         liczPy(a, b, Px){
@@ -675,14 +796,14 @@
             </div>
             <div class ="h">
                 <form>
-                    <label for='h'>Wysokość soczewki: </label>
-                    <input type='number' id='h' placeholder='podaj h:' value=${this._h}>
+                    <label for='h'>Wysokość obudowy: </label>
+                    <input type='number' id='h' placeholder='podaj h:' value=${this._dl}>
                 </form>
             </div>
             <div class='optyka' id='optyka'>
                 <form>
                     <label for='alfa'>alfa: </label>
-                    <input type='number' id='a' placeholder='podaj a:' value=${this._alfa}>
+                    <input type='number' id='alfa' placeholder='podaj a:' value=${this._alfa}>
                 </form>
             </div>
             </div>
@@ -716,13 +837,13 @@
             });
         
             document.getElementById('h').addEventListener("input", function(){
-                os_Optyczna[id].h = parseFloat(this.value) || 0;
+                os_Optyczna[id].dl = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('alfa').addEventListener("input", function(){
-                os_Optyczna[id]._alfa = parseFloat(this.value) || 0;
+                os_Optyczna[id].alfa = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
@@ -739,57 +860,104 @@
         }
     
         czyKliknal(x, y){
-            if(this._wspx-x<-1*margines||this._wspx-x>margines)   return false;
-            if(y>this._h+WYSOKOSC/2+margines||y<-1*this._h+WYSOKOSC/2-margines)   return false;
-            return true;
-        }
-    
-        wZasiegu(kierunek, xo, Px, Py){
-            if(kierunek==1){
-                if(this._wspx<=xo)    return false;
+            console.log(this._kierunek);
+            console.log(this._wspx, this._wspy, this._wspx2, this._wspy2);
+            if(this._kierunek==1){
+                if(x>=this._wspx-margines&&x<=this._wspx2+margines){
+                    if(this._wspy2>this._wspy){
+                        if(y>=this._wspy-margines&&y<=this._wspy2+margines)   return true;
+                    }
+                    else{
+                        if(y<=this._wspy+margines&&y>=this._wspy2-margines)   return true;
+                    }
+                }
+                return false;
             }
             else{
-                if(this._wspx>=xo)    return false;
+                if(x<=this._wspx+margines&&x>=this._wspx2-margines){
+                    if(this._wspy2>this._wspy){
+                        if(y>=this._wspy-margines&&y<=this._wspy2+margines)   return true;
+                    }
+                    else{
+                        if(y<=this._wspy+margines&&y>=this._wspy2-margines)   return true;
+                    }
+                }
+                return false;
             }
-            if(WYSOKOSC/2+this._h<Py)  return false;
-            if(WYSOKOSC/2-this._h>Py)  return false;
-            return true;
+        }
+    
+        rysuj(){        
+            ctx.beginPath();
+            ctx.lineWidth=5;
+        
+            ctx.moveTo(this._wspx, this._wspy);
+            ctx.lineTo(this._wspx +this._dl*Math.cos(this._alfa*Math.PI/180),this._wspy - this._dl*Math.sin(this._alfa*Math.PI/180));
+        
+            ctx.stroke();
+        }
+
+        wZasiegu(kierunek, xo, Px, Py){
+            if(kierunek==1){
+                if(Px<=xo) return false;
+                if(Math.sqrt((Px-this._wspx)**2+(Py-this._wspy)**2)<=this._dl)
+                {
+                    if(this._kierunek==1){
+                        if(Px<this._wspx)   return false;
+                    }
+                    else{
+                        if(Px>this._wspx)   return false;
+                    }
+                    return true;
+                }
+                else return false;
+            }
+            else{
+                if(Px>=xo) return false;
+                if(Math.sqrt((Px-this._wspx)**2+(Py-this._wspy)**2)<=this._dl)
+                {
+                        if(this._kierunek==1){
+                            if(Px<this._wspx)   return false;
+                        }
+                        else{
+                            if(Px>this._wspx)   return false;
+                        }
+                        return true;
+                }
+                return false;
+            }
         }
     
         rysujElementyKontrolne(){
             ctx.beginPath();
-            ctx.lineWidth=3;
-            ctx.arc(this._wspx+30, WYSOKOSC/2-30, 10, 0, 2 * Math.PI);
-            ctx.moveTo(this._wspx+30, WYSOKOSC/2-this._h+10);
-            ctx.arc(this._wspx+30, WYSOKOSC/2-this._h+10, 10, 0, 2 * Math.PI);
-            ctx.moveTo(this._wspx+this._F, WYSOKOSC/2+80);
-            ctx.arc(this._wspx+this._F, WYSOKOSC/2+80, 10, 0, 2 * Math.PI);
+            ctx.lineWidth=2;
+            ctx.moveTo(this._wspx, this._wspy);
+            ctx.arc(this._wspx, this._wspy, 5, 0, Math.PI*2);
+            
+            ctx.moveTo(this._wspx2, this._wspy2);
+            ctx.arc(this._wspx2, this._wspy2, 5, 0, Math.PI*2);
+
             ctx.fill();
             ctx.stroke();
         }
     
         prev(){
-            return [this._wspx,this._wspy, this._h, this._alfa];
+            return [this._wspx,this._wspy, this._wspx2, this.wspy2];
         }
     
         wrocPrev(prev){
             this.wspx = prev[0];
             this.wspy = prev[1];
-            this.h = prev[2];
-            this._alfa = prev[3];
+            this.wspx2 = prev[2];
+            this.wspy2 = prev[3];
         }
     
         klikniety(x, y){
-            if(x>=this._wspx+20-margines&&x<=this._wspx+40+margines&&y>= WYSOKOSC/2-40-margines&&y<= WYSOKOSC/2-20+margines){
-                zmienWspx(this._id, x, y, "wspx");
+            if(Math.abs(x-this._wspx)<=margines+5&&Math.abs(y-this._wspy)<=margines+5){
+                zmienWspx(this._id, x, y, "wspXY");
                 return 1;
             }
-            else if(x<=this._wspx+40+margines&&x>=this._wspx+20-margines&&y>=WYSOKOSC/2-this._h-margines&&y<= WYSOKOSC/2-this._h+20+margines){
-                zmienWspx(this._id, x, y, "h");
-                return 1;
-            }
-            else if(x>=this._wspx+this._F-10-margines&&x<=this._wspx+this._F+10+margines&&y<= WYSOKOSC/2+90+margines&&y>=WYSOKOSC/2+70-margines){
-                zmienWspx(this._id, x, y, "alfa");
+            else if(Math.abs(x-this._wspx2)<=margines+5&&Math.abs(y-this._wspy2)<=margines+5){
+                zmienWspx(this._id, x, y, "wspXY2");
                 return 1;
             }
             return 0;
@@ -799,6 +967,8 @@
     class Lustro extends Obudowa{
         constructor(){
             super();
+            this._nazwa = "Lus";
+            this._typ = "Lustro";
         }
     }
     
@@ -975,11 +1145,27 @@
                     continue;
                 }
     
-                if(Math.abs(xo-Px)<min){
-                    min = Math.abs(xo-Px);
-                    min_id = i;
-                    Pmin = Py;
-                    Pminx = Px;
+                if(Px.length==2){
+                    if(Math.abs(xo-Px[0])<min){
+                        min = Math.abs(xo-Px[0]);
+                        min_id = i;
+                        Pmin = Py[0];
+                        Pminx = Px[0];
+                    }
+                    if(Math.abs(xo-Px[1])<min){
+                        min = Math.abs(xo-Px);
+                        min_id = i;
+                        Pmin = Py[1];
+                        Pminx = Px[1];
+                    }
+                }
+                else{
+                    if(Math.abs(xo-Px)<min){
+                        min = Math.abs(xo-Px);
+                        min_id = i;
+                        Pmin = Py;
+                        Pminx = Px;
+                    }
                 }
             }
     
@@ -1005,7 +1191,8 @@
             ctx.lineTo(Pminx, Pmin);
             xo = Pminx;
     
-            [a, b] = obiektyOptyczne[min_id].zmienBiegPromienia(kierunek, a, b, xo, 0, Pmin);
+            if(obiektyOptyczne[min_id]._typ==="Obudowa") {ctx.stroke();break;}
+            else    [a, b, kierunek] = obiektyOptyczne[min_id].zmienBiegPromienia(kierunek, a, b, xo, Pminx, Pmin);
     
         }
         }
@@ -1158,12 +1345,11 @@
         }
     
         rysuj(){
-        
             ctx.beginPath();
             ctx.lineWidth=2;
         
-            ctx.moveTo(this._wspx, this._wspy);
-            ctx.arc(this._wspx, this._wspy, 20, 0, Math.PI * 2, true);
+            ctx.moveTo(this._wspx+20, this._wspy);
+            ctx.arc(this._wspx, this._wspy, 20, 0, Math.PI * 2);
         
             ctx.stroke();
         }
@@ -1203,14 +1389,29 @@
                         continue;
                     }
         
-                    if(Math.abs(xo-Px)<min){
-                        min = Math.abs(xo-Px);
-                        min_id = i;
-                        Pmin = Py;
-                        Pminx = Px;
+                    if(Px.length==2){
+                        if(Math.abs(xo-Px[0])<min){
+                            min = Math.abs(xo-Px[0]);
+                            min_id = i;
+                            Pmin = Py[0];
+                            Pminx = Px[0];
+                        }
+                        if(Math.abs(xo-Px[1])<min){
+                            min = Math.abs(xo-Px);
+                            min_id = i;
+                            Pmin = Py[1];
+                            Pminx = Px[1];
+                        }
+                    }
+                    else{
+                        if(Math.abs(xo-Px)<min){
+                            min = Math.abs(xo-Px);
+                            min_id = i;
+                            Pmin = Py;
+                            Pminx = Px;
+                        }
                     }
                 }
-        
                 if(min_id==-1){
                     if(kierunek==1)
                     {
@@ -1233,7 +1434,8 @@
                 ctx.lineTo(Pminx, Pmin);
                 xo = Pminx;
         
-                [a, b] = obiektyOptyczne[min_id].zmienBiegPromienia(kierunek, a, b, xo, 0, Pmin);
+                if(obiektyOptyczne[min_id]._typ==="Obudowa") {ctx.stroke();break;}
+                else    [a, b, kierunek] = obiektyOptyczne[min_id].zmienBiegPromienia(kierunek, a, b, xo, Pminx, Pmin);
         
             }
         }
@@ -1244,7 +1446,9 @@
             ctx.beginPath();
             ctx.lineWidth = 3;
         
-            ctx.arc(this._wspx, this._wspy, 2, 0, 2 * Math.PI);
+
+            ctx.moveTo(this._wspx, this._wspy);
+            ctx.arc(this._wspx, this._wspy, 3, 0, 2 * Math.PI);
         
             ctx.fill();
             ctx.stroke();
@@ -1633,6 +1837,8 @@
                     if (obj._typ === "SoczewkaRozpraszajaca") return Object.assign(new SoczewkaRozpraszajaca(), obj);
                     if (obj._typ === "ZwierciadloWklesle") return Object.assign(new ZwierciadloWklesle(), obj);
                     if (obj._typ === "ZwierciadloWypukle") return Object.assign(new ZwierciadloWypukle(), obj);
+                    if (obj._typ === "Obudowa") return Object.assign(new Obudowa(), obj);
+                    if (obj._typ === "Lustro") return Object.assign(new Lustro(), obj);
                     if (obj._typ === "Promien") return Object.assign(new Promien(), obj);
                     if (obj._typ === "Żarówka") return Object.assign(new Zarowka(), obj);
                     return obj;  
@@ -2033,19 +2239,27 @@
                         </div>
                         <span>Soczewki</span>
                     </div>
+                    <div class='zwierciadla'>
+                        <div class="kontener-przyciskow">
+                            <button class='zwierciadlo-wklesle' id='zwierciadlo-wklesle'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Wklęsłe</span></button>
+                            <button class='zwierciadlo-wypukle' id='zwierciadlo-wypukle'><img height=100% width=100% src="img/rozpraszajaca.png"><span class="span-przycisk">Wypukłe</span></button>
+                        </div>
+                        <span>Zwierciadła</span>
+                    </div>
                     <div class='zrodla-swiatla'>
                         <div class="kontener-przyciskow">
                             <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Promień</span></button>
                             <button class='promien-swietlny' id='zarowka'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Żarówka</span></button>
                         </div>
                         <span>Żródła światła</span>
-                    </div>`;/*                    <div class='zwierciadla'>
+                    </div>  
+                    <div class='zwierciadla'>
                     <div class="kontener-przyciskow">
-                        <button class='zwierciadlo-wklesle' id='zwierciadlo-wklesle'><img height=100% width=100% src="img/wklesle.png"><span class="span-przycisk">Wklęsłe</span></button>
-                        <button class='zwierciadlo-wypukle' id='zwierciadlo-wypukle'><img height=100% width=100% src="img/wypukle.png"><span class="span-przycisk">Wypukłe</span></button>
+                        <button class='zwierciadlo-wklesle' id='Lustro'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Lustro</span></button>
+                        <button class='zwierciadlo-wypukle' id='Obudowa'><img height=100% width=100% src="img/rozpraszajaca.png"><span class="span-przycisk">Obudowa</span></button>
                     </div>
-                    <span>Zwierciadła</span>
-                </div>*/
+                    <span>Inne</span>
+                </div>`;       
         kontener.innerHTML= Tworzenie;
     }
     
@@ -2065,14 +2279,22 @@
         document.getElementById('zarowka').addEventListener('click', function(){
             zaktualizujOs(Zarowka);
         });
-/*
+
         document.getElementById('zwierciadlo-wklesle').addEventListener('click', function(){
             zaktualizujOs(ZwierciadloWklesle);
         });
 
         document.getElementById('zwierciadlo-wypukle').addEventListener('click', function(){
             zaktualizujOs(ZwierciadloWypukle);
-        });*/
+        });
+
+        document.getElementById('Lustro').addEventListener('click', function(){
+            zaktualizujOs(Lustro);
+        });
+
+        document.getElementById('Obudowa').addEventListener('click', function(){
+            zaktualizujOs(Obudowa);
+        });
     }
     
     function zaktualizujOs(obiekt) {  
@@ -2270,6 +2492,7 @@
           else if(zmienna ==="F")   os_Optyczna[id].F = dx + os_Optyczna[id]._F;
           else if(zmienna ==="R")   os_Optyczna[id].R = dx + os_Optyczna[id]._R;
           else if(zmienna === "wspXY") {os_Optyczna[id].wspy = os_Optyczna[id]._wspy + dy; os_Optyczna[id].wspx =os_Optyczna[id]._wspx + dx;}
+          else if(zmienna === "wspXY2"){os_Optyczna[id].wspy2 = os_Optyczna[id]._wspy2 + dy; os_Optyczna[id].wspx2 =os_Optyczna[id]._wspx2 + dx;}
           else if(zmienna === "alfa"){
             if(prev[0]-event.clientX<0){
                 os_Optyczna[id]._alfa = -Math.atan((prev[1]-event.clientY)/(prev[0]-event.clientX))*180/Math.PI;
