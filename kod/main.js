@@ -581,7 +581,7 @@
                 else{
                     c = Math.sqrt((Px-(this._wspx-this._R))**2+(Py-WYSOKOSC/2)**2);
                     return this.wypukle(a, b, xo, Px, Py, kierunek, c);
-                }
+                }   
             }
             else{
                 if(Px>this._wspx){
@@ -862,6 +862,7 @@
         czyKliknal(x, y){
             console.log(this._kierunek);
             console.log(this._wspx, this._wspy, this._wspx2, this._wspy2);
+            if(x*this._a+this._b>y+margines||x*this._a+this._b<y-margines)  return false;
             if(this._kierunek==1){
                 if(x>=this._wspx-margines&&x<=this._wspx2+margines){
                     if(this._wspy2>this._wspy){
@@ -1082,7 +1083,7 @@
         
             document.getElementById('usun').addEventListener("click", function(){
                 wyswietlWstazke("SYMULACJA");
-                os_Optyczna.splice(this._id, 1);
+                os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 odswiez_os_optyczna();
                 localStorage.setItem('id_Obiektu', -1);
@@ -1329,7 +1330,7 @@
         
             document.getElementById('usun').addEventListener("click", function(){
                 wyswietlWstazke("SYMULACJA");
-                os_Optyczna.splice(this._id, 1);
+                os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 odswiez_os_optyczna();
                 localStorage.setItem('id_Obiektu', -1);
@@ -1490,7 +1491,7 @@
     
     function rownanieKwadratowe(a, b, c){
         let delta = b**2-4*a*c;
-        if(delta<0) return NaN;
+        if(delta<0) return [NaN, NaN];
         if(delta==0) return [-b/(2*a), -b/(2*a)];
         return [(-b-Math.sqrt(delta))/(2*a), (-b+Math.sqrt(delta))/(2*a)];
     }
