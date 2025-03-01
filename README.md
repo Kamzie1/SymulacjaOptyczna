@@ -30,9 +30,11 @@ r - dodaj soczewkę rozpraszającą
 
 p - dodaj promień
 
-Enter - uruchom symulacje / Policz zaawansowane
+z - dodaj żarówkę
 
-z - pokaż okno zaawansowane
+O - dodaj obudowę
+
+Enter - uruchom symulacje / Policz zaawansowane
 
 delete - usuwa wszystko, lub gdy jesteś na konkretnym obiekcie to ten obiekt usuwa
 
@@ -59,3 +61,4 @@ Backspace - usuwa ostatnio wpisaną liczbę
 Specjalny:
 
 Po kliknięciu ' wpisujesz nową nazwę obiektu, gdy chcesz skończyć to domykasz cytat kolejnym ' np.'Socz1' 
+

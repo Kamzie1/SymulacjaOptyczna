@@ -1035,7 +1035,13 @@
         
             ctx.moveTo(this._wspx+20, this._wspy);
             ctx.arc(this._wspx, this._wspy, 20, 0, Math.PI * 2);
-        
+
+            ctx.moveTo(this._wspx-(20/pierwiastekDwa), this._wspy+(20/pierwiastekDwa));
+            ctx.lineTo(this._wspx+(20/pierwiastekDwa), this._wspy-(20/pierwiastekDwa));
+
+            ctx.moveTo(this._wspx-(20/pierwiastekDwa), this._wspy-(20/pierwiastekDwa));
+            ctx.lineTo(this._wspx+(20/pierwiastekDwa), this._wspy+(20/pierwiastekDwa));
+
             ctx.stroke();
         }
     
@@ -1172,6 +1178,7 @@
     let isFunctionActive = false;
     
     const epsilon = 1e-10;
+    const pierwiastekDwa = Math.sqrt(2);
     const margines = 10;
     const kontener = document.getElementById("trescWstazki");
 
@@ -1256,6 +1263,8 @@
         else if (key === "s") zaktualizujOs(SoczewkaSkupiajaca);
         else if (key === "r") zaktualizujOs(SoczewkaRozpraszajaca);
         else if (key === "p") zaktualizujOs(Promien);
+        else if (key === "z") zaktualizujOs(Zarowka);
+        else if (key === "O") zaktualizujOs(Obudowa);
         else if (key>="0" && key <="9" ||key===".") Wpisz(key);
         else if (key === "o") wybierzObjekt();
         else if (key === "x") zaktulizujZmienna("wspx", "obiekt", id_Obiektu);
@@ -1917,24 +1926,16 @@
                         </div>
                         <span>Soczewki</span>
                     </div>
-                    <div class='zwierciadla'>
-                        <div class="kontener-przyciskow">
-                            <button class='zwierciadlo-wklesle' id='zwierciadlo-wklesle'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Wklęsłe</span></button>
-                            <button class='zwierciadlo-wypukle' id='zwierciadlo-wypukle'><img height=100% width=100% src="img/rozpraszajaca.png"><span class="span-przycisk">Wypukłe</span></button>
-                        </div>
-                        <span>Zwierciadła</span>
-                    </div>
                     <div class='zrodla-swiatla'>
                         <div class="kontener-przyciskow">
                             <button class='promien-swietlny' id='promien-swietlny'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Promień</span></button>
-                            <button class='promien-swietlny' id='zarowka'><img height=100% width=100% src="img/promien-swietlny.png"><span class="span-przycisk">Żarówka</span></button>
+                            <button class='promien-swietlny' id='zarowka'><img height=100% width=100% src="img/zarowka.png"><span class="span-przycisk">Żarówka</span></button>
                         </div>
                         <span>Żródła światła</span>
                     </div>  
                     <div class='zwierciadla'>
                     <div class="kontener-przyciskow">
-                        <button class='zwierciadlo-wklesle' id='Lustro'><img height=100% width=100% src="img/skupiajaca.png"><span class="span-przycisk">Lustro</span></button>
-                        <button class='zwierciadlo-wypukle' id='Obudowa'><img height=100% width=100% src="img/rozpraszajaca.png"><span class="span-przycisk">Obudowa</span></button>
+                        <button class='zwierciadlo-wypukle' id='Obudowa'><img height=100% width=100% src="img/obudowa.png"><span class="span-przycisk">Obudowa</span></button>
                     </div>
                     <span>Inne</span>
                 </div>`;       
@@ -1956,18 +1957,6 @@
 
         document.getElementById('zarowka').addEventListener('click', function(){
             zaktualizujOs(Zarowka);
-        });
-
-        document.getElementById('zwierciadlo-wklesle').addEventListener('click', function(){
-            zaktualizujOs(ZwierciadloWklesle);
-        });
-
-        document.getElementById('zwierciadlo-wypukle').addEventListener('click', function(){
-            zaktualizujOs(ZwierciadloWypukle);
-        });
-
-        document.getElementById('Lustro').addEventListener('click', function(){
-            zaktualizujOs(Lustro);
         });
 
         document.getElementById('Obudowa').addEventListener('click', function(){
