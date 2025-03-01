@@ -1182,6 +1182,13 @@
     const margines = 10;
     const kontener = document.getElementById("trescWstazki");
 
+    function rownanieKwadratowe(a, b, c){
+        let delta = b**2-4*a*c;
+        if(delta<0) return [NaN, NaN];
+        if(delta==0) return [-b/(2*a), -b/(2*a)];
+        return [(-b-Math.sqrt(delta))/(2*a), (-b+Math.sqrt(delta))/(2*a)];
+    }
+
 
     /// Główna pętla
     
