@@ -8,9 +8,11 @@
     canvas.style.display='block';
     canvas.style.width='100%';
     canvas.style.height='100%';
+
     let WYSOKOSC = canvas.height=canvas.offsetHeight;
     let SZEROKOSC = canvas.width=canvas.offsetWidth;
-    const j = 50;
+    
+    const jednostka = 50;
     const ctx = canvas.getContext("2d");
     
     /// deklaracja klas
@@ -22,6 +24,10 @@
             this._id = 0;
         }
     
+        set nazwa(x){
+            this._nazwa = x;
+        }
+
         rysuj(){
     
         }
@@ -105,7 +111,7 @@
         }
     
         wypelnijWstazke(){
-            kontener.innerHTML=`<div class="dane">
+            trescWstazki.innerHTML=`<div class="dane">
             <div class="kontener-przyciskow">
             <div class='nazwa'>
                 <form>  
@@ -145,7 +151,7 @@
     
         dodajEventy(id){
             document.getElementById('nazwa').addEventListener("input", function(){
-                os_Optyczna[id]._nazwa = this.value;
+                os_Optyczna[id].nazwa = this.value;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
@@ -222,11 +228,15 @@
         rysujElementyKontrolne(){
             ctx.beginPath();
             ctx.lineWidth=3;
+
             ctx.arc(this._wspx+30, WYSOKOSC/2-30, 10, 0, 2 * Math.PI);
+
             ctx.moveTo(this._wspx+30, WYSOKOSC/2-this._h+10);
             ctx.arc(this._wspx+30, WYSOKOSC/2-this._h+10, 10, 0, 2 * Math.PI);
+
             ctx.moveTo(this._wspx+this._F, WYSOKOSC/2+80);
             ctx.arc(this._wspx+this._F, WYSOKOSC/2+80, 10, 0, 2 * Math.PI);
+
             ctx.fill();
             ctx.stroke();
         }
@@ -348,6 +358,7 @@
             this._wspy = WYSOKOSC/2;
             this._dl = WYSOKOSC/6;
             this._alfa = 89;
+
             this._a = Math.tan((Math.PI/180*(180-this._alfa)));
             this._b = this._wspy-this._a*this._wspx;;
 
@@ -448,7 +459,7 @@
 
         odswiez(){
             this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
-            this.wspy = this._wspy * (canvas.offsetWidth/WYSOKOSC);
+            this.wspy = this._wspy * (canvas.offsetHeight/WYSOKOSC);
             localStorage.setItem("os_Optyczna", JSON.stringify(os_Optyczna));
         }
     
@@ -466,7 +477,7 @@
         }
     
         wypelnijWstazke(){
-            kontener.innerHTML=`<div class="dane">
+            trescWstazki.innerHTML=`<div class="dane_poj">
             <div class="kontener-przyciskow">
             <div class='nazwa'>
                 <form>  
@@ -501,9 +512,9 @@
             </div>
             <span>Właściwości</span>
             </div>
-            <div class='dod_przyciski' id='dod_przyciski'>
+            <div class='dod_przyciski_poj' id='dod_przyciski'>
                 <div class="kontener-przyciskow">
-                    <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+                    <button class="usun_poj" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
                 </div>
                 <span>Zaawansowane</span>
             </div>`;
@@ -511,7 +522,7 @@
     
         dodajEventy(id){
             document.getElementById('nazwa').addEventListener("input", function(){
-                os_Optyczna[id]._nazwa = this.value;
+                os_Optyczna[id].nazwa = this.value;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
@@ -552,8 +563,6 @@
         }
     
         czyKliknal(x, y){
-            console.log(this._kierunek);
-            console.log(this._wspx, this._wspy, this._wspx2, this._wspy2);
             if(x*this._a+this._b>y+margines||x*this._a+this._b<y-margines)  return false;
             if(this._kierunek==1){
                 if(x>=this._wspx-margines&&x<=this._wspx2+margines){
@@ -690,6 +699,11 @@
             if(x<=WYSOKOSC&&x>=0&&!Number.isNaN(x))
                 this._wspy = x;
         }
+
+        set alfa(x){
+            if(!Number.isNaN(x))
+                this._alfa = x;
+        }
         
         odswiez(){
             this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
@@ -703,7 +717,7 @@
         }
     
         wypelnijWstazke(){
-            kontener.innerHTML=`<div class="dane">
+            trescWstazki.innerHTML=`<div class="dane_poj">
             <div class="kontener-przyciskow">
             <div class='nazwa'>
                 <form>  
@@ -732,9 +746,9 @@
             </div>
             <span>Właściwości</span>
             </div>
-            <div class='dod_przyciski' id='dod_przyciski'>
+            <div class='dod_przyciski_poj' id='dod_przyciski'>
                 <div class="kontener-przyciskow">
-                    <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+                    <button class="usun_poj" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
                 </div>
                 <span>Usuwanie</span>
             </div>`;
@@ -742,25 +756,25 @@
     
         dodajEventy(id){
             document.getElementById('nazwa').addEventListener("input", function(){
-                os_Optyczna[id]._nazwa = this.value;
+                os_Optyczna[id].nazwa = this.value;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('wspx').addEventListener("input", function(){
-                os_Optyczna[id]._wspx = parseFloat(this.value) || 0;
+                os_Optyczna[id].wspx = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('wspy').addEventListener("input", function(){
-                os_Optyczna[id]._wspy = parseFloat(this.value) || 0;
+                os_Optyczna[id].wspy = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('alfa').addEventListener("input", function(){
-                os_Optyczna[id]._alfa = parseFloat(this.value) || 0;
+                os_Optyczna[id].alfa = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
@@ -830,41 +844,25 @@
                     continue;
                 }
     
-                if(Px.length==2){
-                    if(Math.abs(xo-Px[0])<min){
-                        min = Math.abs(xo-Px[0]);
-                        min_id = i;
-                        Pmin = Py[0];
-                        Pminx = Px[0];
-                    }
-                    if(Math.abs(xo-Px[1])<min){
-                        min = Math.abs(xo-Px);
-                        min_id = i;
-                        Pmin = Py[1];
-                        Pminx = Px[1];
-                    }
-                }
-                else{
-                    if(Math.abs(xo-Px)<min){
-                        min = Math.abs(xo-Px);
-                        min_id = i;
-                        Pmin = Py;
-                        Pminx = Px;
-                    }
+                if(Math.abs(xo-Px)<min){
+                    min = Math.abs(xo-Px);
+                    min_id = i;
+                    Pmin = Py;
+                    Pminx = Px;
                 }
             }
     
             if(min_id==-1){
                 if(kierunek==1)
                 {
-                    if(Math.abs(a)<epsilon)
+                    if(Math.abs(a)<epsilion)
                         ctx.lineTo(SZEROKOSC, b);
                     else{
                         ctx.lineTo(SZEROKOSC+100, a*(SZEROKOSC+100)+b);
                     }
                 }
                 else{
-                    if(Math.abs(a)<epsilon)
+                    if(Math.abs(a)<epsilion)
                         ctx.lineTo(0, b);
                     else
                         ctx.lineTo( -100,a*(-100)+b);
@@ -938,6 +936,11 @@
                 this._wspy = x;
         }
         
+        set promienie(x){
+            if(x>=0&&!Number.isNaN(x))
+                this._promienie = x;
+        }
+
         odswiez(){
             this.wspx = this._wspx * (canvas.offsetWidth/SZEROKOSC);
             this.wspy = this._wspy * (canvas.offsetHeight/WYSOKOSC);
@@ -950,7 +953,7 @@
         }
     
         wypelnijWstazke(){
-            kontener.innerHTML=`<div class="dane">
+            trescWstazki.innerHTML=`<div class="dane_poj">
             <div class="kontener-przyciskow">
             <div class='nazwa'>
                 <form>  
@@ -979,9 +982,9 @@
             </div>
             <span>Właściwości</span>
             </div>
-            <div class='dod_przyciski' id='dod_przyciski'>
+            <div class='dod_przyciski_poj' id='dod_przyciski'>
                 <div class="kontener-przyciskow">
-                    <button class="usun" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
+                    <button class="usun_poj" id="usun"><img height=100% width=100% src="img/usun.png"><span class="span-przycisk">Usuń</span></button>
                 </div>
                 <span>Usuwanie</span>
             </div>`;
@@ -989,25 +992,25 @@
     
         dodajEventy(id){
             document.getElementById('nazwa').addEventListener("input", function(){
-                os_Optyczna[id]._nazwa = this.value;
+                os_Optyczna[id].nazwa = this.value;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('wspx').addEventListener("input", function(){
-                os_Optyczna[id]._wspx = parseFloat(this.value) || 0;
+                os_Optyczna[id].wspx = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('wspy').addEventListener("input", function(){
-                os_Optyczna[id]._wspy = parseFloat(this.value) || 0;
+                os_Optyczna[id].wspy = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
         
             document.getElementById('promienie').addEventListener("input", function(){
-                os_Optyczna[id]._promienie = parseFloat(this.value) || 0;
+                os_Optyczna[id].promienie = parseFloat(this.value) || 0;
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
                 rysuj();
             });
@@ -1048,7 +1051,6 @@
         Symuluj(){
         let obiektyOptyczne = os_Optyczna.filter(obj => obj.filter());
         let a, b, xo, yo, kierunek, Px, Py, Pmin, Pminx, alfa=0;
-    
 
         for(let j=0;j<this._promienie;j++)
         {
@@ -1081,41 +1083,26 @@
                     if(!obiektyOptyczne[i].wZasiegu(kierunek, xo, Px, Py)){
                         continue;
                     }
-        
-                    if(Px.length==2){
-                        if(Math.abs(xo-Px[0])<min){
-                            min = Math.abs(xo-Px[0]);
-                            min_id = i;
-                            Pmin = Py[0];
-                            Pminx = Px[0];
-                        }
-                        if(Math.abs(xo-Px[1])<min){
-                            min = Math.abs(xo-Px);
-                            min_id = i;
-                            Pmin = Py[1];
-                            Pminx = Px[1];
-                        }
+
+                    if(Math.abs(xo-Px)<min){
+                        min = Math.abs(xo-Px);
+                        min_id = i;
+                        Pmin = Py;
+                        Pminx = Px;
                     }
-                    else{
-                        if(Math.abs(xo-Px)<min){
-                            min = Math.abs(xo-Px);
-                            min_id = i;
-                            Pmin = Py;
-                            Pminx = Px;
-                        }
-                    }
+    
                 }
                 if(min_id==-1){
                     if(kierunek==1)
                     {
-                        if(Math.abs(a)<epsilon)
+                        if(Math.abs(a)<epsilion)
                             ctx.lineTo(SZEROKOSC, b);
                         else{
                             ctx.lineTo(SZEROKOSC+100, a*(SZEROKOSC+100)+b);
                         }
                     }
                     else{
-                        if(Math.abs(a)<epsilon)
+                        if(Math.abs(a)<epsilion)
                             ctx.lineTo(0, b);
                         else
                             ctx.lineTo( -100,a*(-100)+b);
@@ -1175,12 +1162,12 @@
     let N1 = 1;
     let wpisywanie ="";
     let ifNazwa = 0;
-    let isFunctionActive = false;
+    let funkcjaAktywna = false;
     
-    const epsilon = 1e-10;
+    const epsilion = 1e-10;
     const pierwiastekDwa = Math.sqrt(2);
     const margines = 10;
-    const kontener = document.getElementById("trescWstazki");
+    const trescWstazki = document.getElementById("trescWstazki");
 
     function rownanieKwadratowe(a, b, c){
         let delta = b**2-4*a*c;
@@ -1204,6 +1191,7 @@
         zaladujN1();
         zaladujOgniskowe();
         zaladujWpisywanie();
+
         document.getElementById('wpisywanie').innerHTML = wpisywanie;
         wyswietlWstazke(wstazka, id_Obiektu);
     
@@ -1218,11 +1206,8 @@
         const y = event.clientY - rect.top;
         
         sprawdzWspolrzedne(x, y);
-        document.getElementById('okno-zaawansowane').style.display = "none";   
-        
-        document.getElementById('R1').value="";
-        document.getElementById('R2').value="";
-        document.getElementById('Ns').value="";
+
+        ukryjOknoZaawansowane();
     
         main();
     });
@@ -1274,18 +1259,18 @@
         else if (key === "O") zaktualizujOs(Obudowa);
         else if (key>="0" && key <="9" ||key===".") Wpisz(key);
         else if (key === "o") wybierzObjekt();
-        else if (key === "x") zaktulizujZmienna("wspx", "obiekt", id_Obiektu);
-        else if (key === "h") zaktulizujZmienna("h", "SoczS", id_Obiektu);
-        else if (key === "F") zaktulizujZmienna("F", "SoczS", id_Obiektu);
-        else if (key === "R") zaktulizujZmienna("R", "Zw", id_Obiektu);
-        else if (key === "y") zaktulizujZmienna("wspy", "PromS", id_Obiektu);
-        else if (key === "a") zaktulizujZmienna("alfa", "PromS", id_Obiektu);
+        else if (key === "x") zaktulizujZmienna("wspx", id_Obiektu);
+        else if (key === "h") zaktulizujZmienna("h", id_Obiektu);
+        else if (key === "F") zaktulizujZmienna("F", id_Obiektu);
+        else if (key === "y") zaktulizujZmienna("wspy", id_Obiektu);
+        else if (key === "a") zaktulizujZmienna("alfa", id_Obiektu);
+        else if (key === "l") zaktulizujZmienna("liczba_prom", id_Obiektu);
         else if (key === "S") wyswietlWstazke("SYMULACJA", id_Obiektu);
         else if (key === "T") wyswietlWstazke("TWORZENIE", id_Obiektu);
         else if (key === "W" && id_Obiektu!=-1) wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
         else if (key === "z") pokazZaawansowane();
         else if (key === "q") opuscObiekt();
-        else if (key === "N") zaktulizujZmienna("N1", "N1", id_Obiektu);
+        else if (key === "N") zaktulizujZmienna("N1", id_Obiektu);
     
     });
     
@@ -1313,46 +1298,73 @@
     
         document.getElementById('wpisywanie').innerHTML = wpisywanie;
         
-        localStorage.setItem('wpsiywanie', wpisywanie);
+        localStorage.setItem('wpisywanie', wpisywanie);
     
     }
     
-    function zaktulizujZmienna(zmienna, typ, id){
+    function zaktulizujZmienna(zmienna, id){
         zaladujOs();
         zaladujAktualneId();
         id = id_Obiektu;
+
         wpisywanie = parseFloat(wpisywanie) ||0;
-        if(typ === "N1"){
-            if(!sprawdzZgodnoscDanych(wpisywanie, "N")){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie;  return;}
+
+        if(zmienna === "N1"){
+            if(isNaN(wpisywanie)||wpisywanie<=0){wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie;  return;}
             localStorage.setItem("N1", wpisywanie);
+            wyczyscWpisywanie();
+            document.getElementById('wpisywanie').innerHTML = wpisywanie;
+            main();
+            return;
         }
-        else if(id==-1){
+
+        if(id==-1){
             wyczyscWpisywanie();
             document.getElementById('wpisywanie').innerHTML = wpisywanie;
             return;
         }
-        else if(zmienna === "wspx"){
-            os_Optyczna[id].wspx = wpisywanie;
-        }
-        else if(typ === "PromS" && os_Optyczna[id]._typ === "PromS"){
+
+        let typ = os_Optyczna[id]._typ;
+
+        if(typ === "Promien"){
             if(zmienna === "wspy"){
                 os_Optyczna[id].wspy = wpisywanie;
             }
             else if(zmienna === "alfa"){
-                os_Optyczna[id]._alfa = wpisywanie;
+                os_Optyczna[id].alfa = wpisywanie;
+            }
+            else if(zmienna === "wspx"){
+                os_Optyczna[id].wspx = wpisywanie;
             }
         }
-        else if(typ === "SoczS" && os_Optyczna[id]._typ === "SoczS"){
+        else if(typ === "SoczewkaSkupiajaca" || typ === "SoczewkaRozpraszajaca" ){
             if(zmienna === "h"){
                 os_Optyczna[id].h = wpisywanie;
             }
             else if(zmienna === "F"){
                 os_Optyczna[id].F = wpisywanie;
             }
+            else if(zmienna === "wspx"){
+                os_Optyczna[id].wspx = wpisywanie;
+            }
         }
-        else if(typ==="Zw"&& os_Optyczna[id]._typ === "Zwierciadlo"){
-            if(zmienna === "R"){
-                os_Optyczna[id].R = wpisywanie;
+        else if(typ === "Żarówka"){
+            if(zmienna === "wspy"){
+                os_Optyczna[id].wspy = wpisywanie;
+            }
+            else if(zmienna === "liczba_prom"){
+                os_Optyczna[id].promienie = wpisywanie;
+            }
+            else if(zmienna === "wspx"){
+                os_Optyczna[id].wspx = wpisywanie;
+            }
+        }
+        else if(typ === "Obudowa"){
+            if(zmienna === "wspy"){
+                os_Optyczna[id].wspy = wpisywanie;
+            }
+            else if(zmienna === "wspx"){
+                os_Optyczna[id].wspx = wpisywanie;
             }
         }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -1426,7 +1438,7 @@
     
     function wybierzObjekt(){
         wpisywanie = parseFloat(wpisywanie) ||0;
-        if(!sprawdzZgodnoscDanych(wpisywanie, "id"))  {wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
+        if(isNaN(wpisywanie)||wpisywanie<0||Math.floor(wpisywanie)!=wpisywanie||wpisywanie>=os_Optyczna.length)  {wyczyscWpisywanie(); document.getElementById('wpisywanie').innerHTML = wpisywanie; return;}
         localStorage.setItem('id_Obiektu', wpisywanie);
         wyswietlWstazke("WŁAŚCIWOŚCI", wpisywanie);
         rysuj();
@@ -1467,7 +1479,8 @@
         else{
             ifNazwa=0;
             zaladujOs();
-            os_Optyczna[id_Obiektu]._nazwa = wpisywanie;
+            os_Optyczna[id_Obiektu].nazwa = wpisywanie;
+            console.log(wpisywanie);
             localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
             localStorage.setItem("ifNazwa", ifNazwa);
             wyczyscWpisywanie();
@@ -1529,10 +1542,7 @@
                 os_Optyczna = os_Optyczna.map(obj => {
                     if (obj._typ === "SoczewkaSkupiajaca") return Object.assign(new SoczewkaSkupiajaca(), obj);
                     if (obj._typ === "SoczewkaRozpraszajaca") return Object.assign(new SoczewkaRozpraszajaca(), obj);
-                    if (obj._typ === "ZwierciadloWklesle") return Object.assign(new ZwierciadloWklesle(), obj);
-                    if (obj._typ === "ZwierciadloWypukle") return Object.assign(new ZwierciadloWypukle(), obj);
                     if (obj._typ === "Obudowa") return Object.assign(new Obudowa(), obj);
-                    if (obj._typ === "Lustro") return Object.assign(new Lustro(), obj);
                     if (obj._typ === "Promien") return Object.assign(new Promien(), obj);
                     if (obj._typ === "Żarówka") return Object.assign(new Zarowka(), obj);
                     return obj;  
@@ -1634,7 +1644,7 @@
     }
     
     function rysujGrid(){
-        let odl=j;
+        let odl=jednostka;
     
         ctx.beginPath();
     
@@ -1776,7 +1786,7 @@
         </div>
         <span>Obiekty</span>
     </div>`;
-        kontener.innerHTML=Symulacja;
+        trescWstazki.innerHTML=Symulacja;
     }
     
     function wypelnijListeObiektow(){
@@ -1833,7 +1843,13 @@
         });
     
         document.getElementById('N1').addEventListener('input', function(){
-            localStorage.setItem('N1', parseFloat(this.value) || 0);
+            let x = parseFloat(this.value) || 0;
+            if( x> 0 && !isNaN(x)){
+                localStorage.setItem('N1', x);
+            }
+            else{
+                localStorage.setItem('N1', 1);
+            }
         });
     }
     
@@ -1940,13 +1956,13 @@
                         </div>
                         <span>Żródła światła</span>
                     </div>  
-                    <div class='zwierciadla'>
+                    <div class='zrodla-swiatla'>
                     <div class="kontener-przyciskow">
-                        <button class='zwierciadlo-wypukle' id='Obudowa'><img height=100% width=100% src="img/obudowa.png"><span class="span-przycisk">Obudowa</span></button>
+                        <button class='obudowa' id='Obudowa'><img height=100% width=100% src="img/obudowa.png"><span class="span-przycisk">Obudowa</span></button>
                     </div>
                     <span>Inne</span>
                 </div>`;       
-        kontener.innerHTML= Tworzenie;
+        trescWstazki.innerHTML= Tworzenie;
     }
     
     function dodajEventTworzenia(){
@@ -2033,30 +2049,6 @@
         main();
     }
     
-    function sprawdzZgodnoscDanych(x, typ){
-        if(typ!="alfa" && typ!="wspx" && typ!="wspy" && typ!="id"&&typ!="F"&&typ!="R"){
-            if(x<=0)    return false;
-        }
-        if(typ=="h"){
-            if(x>WYSOKOSC/2)    return false;
-        }
-        if(typ=="wspx"){
-            if(x>SZEROKOSC||x<0)  return false;
-        }
-        if(typ=="wspy"){
-            if(x>WYSOKOSC||x<0)  return false;
-        }
-        if(typ=="alfa"){
-            if(x-360*Math.floor(x/360)==90||x-360*Math.floor(x/360)==270)   return false;
-        }
-        if(typ=="id"){
-            zaladujOs();
-            if(x<0||x>=os_Optyczna.length||Math.floor(x)!=x)    return false;
-        }
-        if(Number.isNaN(x))  return false;
-        return true;
-    }
-    
     function policz(){
         zaladujAktualneId();
         zaladujN1();
@@ -2086,13 +2078,8 @@
         if(Ns==N1)  return;
     
         if(R1==-R2) return;
-    
-        if(sprawdzZgodnoscDanych(1/(((1/R1)+(1/R2))*((Ns/N1)-1)), "F")){
-            os_Optyczna[id_Obiektu].F = 1/(((1/R1)+(1/R2))*((Ns/N1)-1));
-        }
-        else{
-            return;
-        }
+        
+        os_Optyczna[id_Obiektu].F = Math.abs(1/(((1/R1)+(1/R2))*((Ns/N1)-1)));
     
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         ukryjOknoZaawansowane();
@@ -2134,17 +2121,11 @@
     /// przesuwanie myszą obiektów
     
     function zmienWspx(id, startX, startY, zmienna) {
-        if (isFunctionActive) {
+        if (funkcjaAktywna) {
             return; 
           }
         
-        isFunctionActive = true; 
-        
-        if (!os_Optyczna[id]) {
-            console.error(`Nie znaleziono os_Optyczna[${id}]`);
-            isFunctionActive = false; 
-            return;
-          }
+        funkcjaAktywna = true; 
     
         let prev;
     
@@ -2188,7 +2169,7 @@
         
         function clickHandler(event) {
             removeListeners();
-            isFunctionActive = false;
+            funkcjaAktywna = false;
             rysuj();
         }
         
@@ -2198,7 +2179,7 @@
     
             os_Optyczna[id].wrocPrev(prev);
             localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
-            isFunctionActive = false;
+            funkcjaAktywna = false;
             rysuj();
           }
         }
