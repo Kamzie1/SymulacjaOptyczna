@@ -2,11 +2,11 @@
 
 ///Określenia fizyczne
 
-N1 - współczynik załamania w ośrodku w którym znajduje się układ
+N1 - współczynnik załamania w ośrodku, w którym znajduje się układ
 
 Ns - współczynnik załamania materiału soczewki(wpływa na ogniskową)
 
-F - ogniskowa (punkt przecięcia promieni, gdy zostały puszczone równolegle do osi optycznej)
+F - ogniskowa 
 
 R1, R2 - promienie ograniczające soczewkę
 
@@ -38,7 +38,7 @@ Enter - uruchom symulacje / Policz zaawansowane
 
 delete - usuwa wszystko, lub gdy jesteś na konkretnym obiekcie to ten obiekt usuwa
 
-esc - wychodzi z trybu wpisywania liczb, wychodzi z okna zaawansowane i wychodzi z trybu przesuwania myszą(cofa do ustawień początkowych), reset symulacji
+esc - wychodzi z trybu wpisywania liczb, wychodzi z okna zaawansowane, wychodzi z trybu przesuwania myszą(cofa do ustawień początkowych), resetuje symulację
 
 Skróty na końcu podanej liczby (19 o)
 
@@ -56,9 +56,13 @@ y - zmienia wspy na podane
 
 a - zmienia kąt na podany
 
+l - zmienia liczbę promieni
+
+d - zmienia długość obudowy
+
 Backspace - usuwa ostatnio wpisaną liczbę
 
 Specjalny:
 
-Po kliknięciu ' wpisujesz nową nazwę obiektu, gdy chcesz skończyć to domykasz cytat kolejnym ' np.'Socz1' 
-
+Po kliknięciu ' wpisujesz nową nazwę obiektu, gdy chcesz skończyć to domykasz cytat kolejnym ' 
+                np.'Socz1' 

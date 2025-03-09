@@ -175,6 +175,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
+                usunAudio.play();
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -552,6 +553,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
+                usunAudio.play();
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -780,6 +782,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
+                usunAudio.play();
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -1016,6 +1019,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
+                usunAudio.play();
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -1169,13 +1173,21 @@
     const margines = 10;
     const trescWstazki = document.getElementById("trescWstazki");
 
+    //audio
+    const stworzAudio = new Audio('audio/stworz.mp3');
+    const przyciskAudio = new Audio('audio/przycisk.mp3');
+    const uruchomAudio = new Audio('audio/uruchom.mp3');
+    const usunAudio = new Audio('audio/usun.mp3');
+    const switchAudio = new Audio('audio/switch.mp3');
+
+    //funkcja matematyczna
+
     function rownanieKwadratowe(a, b, c){
         let delta = b**2-4*a*c;
         if(delta<0) return [NaN, NaN];
         if(delta==0) return [-b/(2*a), -b/(2*a)];
         return [(-b-Math.sqrt(delta))/(2*a), (-b+Math.sqrt(delta))/(2*a)];
     }
-
 
     /// Główna pętla
     
@@ -1218,10 +1230,12 @@
     window.addEventListener("orientationchange", zmianaEkranu);
     
     document.getElementById('Opcja-symulacji').addEventListener('click', function() {
+        przyciskAudio.play();
         wyswietlWstazke("SYMULACJA", id_Obiektu);
     });
     
     document.getElementById('Opcja-tworzenia').addEventListener('click', function() {
+        przyciskAudio.play();
         wyswietlWstazke("TWORZENIE", id_Obiektu);
     });
     
@@ -1265,10 +1279,10 @@
         else if (key === "y") zaktulizujZmienna("wspy", id_Obiektu);
         else if (key === "a") zaktulizujZmienna("alfa", id_Obiektu);
         else if (key === "l") zaktulizujZmienna("liczba_prom", id_Obiektu);
+        else if (key === "d") zaktulizujZmienna("d", id_Obiektu);
         else if (key === "S") wyswietlWstazke("SYMULACJA", id_Obiektu);
         else if (key === "T") wyswietlWstazke("TWORZENIE", id_Obiektu);
         else if (key === "W" && id_Obiektu!=-1) wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
-        else if (key === "z") pokazZaawansowane();
         else if (key === "q") opuscObiekt();
         else if (key === "N") zaktulizujZmienna("N1", id_Obiektu);
     
@@ -1366,6 +1380,12 @@
             else if(zmienna === "wspx"){
                 os_Optyczna[id].wspx = wpisywanie;
             }
+            else if(zmienna === "alfa"){
+                os_Optyczna[id].alfa = wpisywanie;
+            }
+            else if(zmienna === "d"){
+                os_Optyczna[id].dl = wpisywanie;
+            }
         }
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         wyczyscWpisywanie();
@@ -1446,19 +1466,8 @@
         document.getElementById('wpisywanie').innerHTML = wpisywanie;
     }
     
-    function pokazZaawansowane(){
-        let okno = document.getElementById('okno-zaawansowane');
-        let displayStyle = window.getComputedStyle(okno).display; 
-    
-        if(displayStyle === "none" && wstazka === "WŁAŚCIWOŚCI"){
-            document.getElementById('okno-zaawansowane').style.display = "block";
-        }
-        else{
-            return;
-        }
-    }
-    
     function opuscObiekt(){
+        usunAudio.play();
         localStorage.setItem('id_Obiektu', -1);
         wyswietlWstazke("SYMULACJA");
         usunWstazkeWlasciwosci();
@@ -1466,6 +1475,7 @@
     }
     
     function wpiszNazwe(id){
+        switchAudio.play();
         zaladujAktualneId();
         zaladujIfNazwa();
         id = id_Obiektu;
@@ -1480,7 +1490,6 @@
             ifNazwa=0;
             zaladujOs();
             os_Optyczna[id_Obiektu].nazwa = wpisywanie;
-            console.log(wpisywanie);
             localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
             localStorage.setItem("ifNazwa", ifNazwa);
             wyczyscWpisywanie();
@@ -1593,6 +1602,7 @@
     /// Funckje symulacji
     
     function uruchomSymulacje(){
+        uruchomAudio.play();
         zaladujOs();
         let zrodla_swiatla = os_Optyczna.filter(obj => !(obj.filter()));
         for(let i=0;i<zrodla_swiatla.length;i++){
@@ -1827,10 +1837,12 @@
         });
     
         document.getElementById('pokaz-ogniskowe').addEventListener('click', function(){
+            przyciskAudio.play();
             obsluzOgniskowe();
         });
     
         document.getElementById('pokaz-grid').addEventListener('click', function(){
+            przyciskAudio.play();
             obsluzGrid();
         });
     
@@ -1839,6 +1851,7 @@
         });
     
         document.getElementById('reset').addEventListener('click', function(){
+            przyciskAudio.play();
             rysuj();
         });
     
@@ -1888,6 +1901,7 @@
     }
     
     function wyczysc(){
+        usunAudio.play();
         os_Optyczna=[];
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         localStorage.setItem('id_Obiektu', -1);
@@ -1996,6 +2010,7 @@
     
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         wyswietlWstazke("WŁAŚCIWOŚCI", os_Optyczna.length - 1);
+        stworzAudio.play();
         rysuj();
     }
     
@@ -2028,6 +2043,7 @@
     function dodajEventWstazkiWlasciwosci(){
         document.getElementById('Opcja-wlasciwosci').addEventListener('click', function() {
             zaladujAktualneId();
+            przyciskAudio.play();
             wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
         });
     }
@@ -2040,6 +2056,7 @@
     }
     
     function usunObject(id){
+        usunAudio.play();
         wyswietlWstazke("SYMULACJA");
         os_Optyczna.splice(id, 1);
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -2050,26 +2067,27 @@
     }
     
     function policz(){
+        przyciskAudio.play();
         zaladujAktualneId();
         zaladujN1();
         zaladujOs();
         let R1, R2, Ns;
     
-        if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('R1').value) || 0 ,  "R")){
+        if(parseFloat(document.getElementById('R1').value) || 0 > 0&&!isNaN(parseFloat(document.getElementById('R1').value) || 0 )){
             R1 = parseFloat(document.getElementById('R1').value) || 0;
         }
         else{
             return;
         }
     
-        if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('R2').value) || 0 ,  "R")){
+        if(parseFloat(document.getElementById('R2').value) || 0 > 0&&!isNaN(parseFloat(document.getElementById('R2').value) || 0 )){
             R2 = parseFloat(document.getElementById('R2').value) || 0;
         }
         else{
             return;
         }
     
-        if(sprawdzZgodnoscDanych(parseFloat(document.getElementById('Ns').value) || 0 ,  "N")){
+        if(parseFloat(document.getElementById('Ns').value) || 0 > 0&&!isNaN(parseFloat(document.getElementById('Ns').value) || 0 )){
             Ns = parseFloat(document.getElementById('Ns').value) || 0;
         }
         else{
