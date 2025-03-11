@@ -175,7 +175,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
-                usunAudio.play();
+                playSound("usun");
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -553,7 +553,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
-                usunAudio.play();
+                playSound("usun");
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -782,7 +782,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
-                usunAudio.play();
+                playSound("usun");
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -1019,7 +1019,7 @@
             });
         
             document.getElementById('usun').addEventListener("click", function(){
-                usunAudio.play();
+                playSound("usun");
                 wyswietlWstazke("SYMULACJA");
                 os_Optyczna.splice(id, 1);
                 localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -1174,11 +1174,27 @@
     const trescWstazki = document.getElementById("trescWstazki");
 
     //audio
-    const stworzAudio = new Audio('audio/stworz.mp3');
-    const przyciskAudio = new Audio('audio/przycisk.mp3');
-    const uruchomAudio = new Audio('audio/uruchom.mp3');
-    const usunAudio = new Audio('audio/usun.mp3');
-    const switchAudio = new Audio('audio/switch.mp3');
+
+    function zaladujAudio(nazwa_pliku) {
+        const audio = new Audio(`audio/${nazwa_pliku}.mp3`);
+        audio.preload = 'auto';
+        return audio;
+    }
+    
+    const listaDzwiekow = ['stworz', 'przycisk', 'uruchom', 'usun', 'switch'];
+    const plikiAudio = {};
+    
+    listaDzwiekow.forEach(name => {
+        const audio = zaladujAudio(name);
+        plikiAudio[name] = audio;
+    });
+    
+    function playSound(name) {
+        plikiAudio[name].currentTime = 0;
+        plikiAudio[name].play()
+    }
+    
+    
 
     //funkcja matematyczna
 
@@ -1230,12 +1246,12 @@
     window.addEventListener("orientationchange", zmianaEkranu);
     
     document.getElementById('Opcja-symulacji').addEventListener('click', function() {
-        przyciskAudio.play();
+        playSound("przycisk");
         wyswietlWstazke("SYMULACJA", id_Obiektu);
     });
     
     document.getElementById('Opcja-tworzenia').addEventListener('click', function() {
-        przyciskAudio.play();
+        playSound("przycisk");
         wyswietlWstazke("TWORZENIE", id_Obiektu);
     });
     
@@ -1467,7 +1483,6 @@
     }
     
     function opuscObiekt(){
-        usunAudio.play();
         localStorage.setItem('id_Obiektu', -1);
         wyswietlWstazke("SYMULACJA");
         usunWstazkeWlasciwosci();
@@ -1475,7 +1490,7 @@
     }
     
     function wpiszNazwe(id){
-        switchAudio.play();
+        playSound("switch");
         zaladujAktualneId();
         zaladujIfNazwa();
         id = id_Obiektu;
@@ -1602,7 +1617,7 @@
     /// Funckje symulacji
     
     function uruchomSymulacje(){
-        uruchomAudio.play();
+        playSound("uruchom");
         zaladujOs();
         let zrodla_swiatla = os_Optyczna.filter(obj => !(obj.filter()));
         for(let i=0;i<zrodla_swiatla.length;i++){
@@ -1837,12 +1852,12 @@
         });
     
         document.getElementById('pokaz-ogniskowe').addEventListener('click', function(){
-            przyciskAudio.play();
+            playSound("przycisk");
             obsluzOgniskowe();
         });
     
         document.getElementById('pokaz-grid').addEventListener('click', function(){
-            przyciskAudio.play();
+            playSound("przycisk");
             obsluzGrid();
         });
     
@@ -1851,7 +1866,7 @@
         });
     
         document.getElementById('reset').addEventListener('click', function(){
-            przyciskAudio.play();
+            playSound('przycisk');
             rysuj();
         });
     
@@ -1901,7 +1916,7 @@
     }
     
     function wyczysc(){
-        usunAudio.play();
+        playSound("usun");
         os_Optyczna=[];
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         localStorage.setItem('id_Obiektu', -1);
@@ -2010,7 +2025,7 @@
     
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
         wyswietlWstazke("WŁAŚCIWOŚCI", os_Optyczna.length - 1);
-        stworzAudio.play();
+        playSound('stworz');
         rysuj();
     }
     
@@ -2043,7 +2058,7 @@
     function dodajEventWstazkiWlasciwosci(){
         document.getElementById('Opcja-wlasciwosci').addEventListener('click', function() {
             zaladujAktualneId();
-            przyciskAudio.play();
+            playSound("przycisk");
             wyswietlWstazke("WŁAŚCIWOŚCI", id_Obiektu);
         });
     }
@@ -2056,7 +2071,7 @@
     }
     
     function usunObject(id){
-        usunAudio.play();
+        playSound("usun");
         wyswietlWstazke("SYMULACJA");
         os_Optyczna.splice(id, 1);
         localStorage.setItem('os_Optyczna', JSON.stringify(os_Optyczna));
@@ -2067,7 +2082,7 @@
     }
     
     function policz(){
-        przyciskAudio.play();
+        playSound('przycisk');
         zaladujAktualneId();
         zaladujN1();
         zaladujOs();
