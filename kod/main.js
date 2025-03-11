@@ -1173,28 +1173,31 @@
     const margines = 10;
     const trescWstazki = document.getElementById("trescWstazki");
 
-    //audio
+    //audio   
+
+    const listaDzwiekow = ['stworz', 'przycisk', 'uruchom', 'usun', 'switch'];
+    const plikiAudio = {}; 
+
+    window.onload = async function () {
+        await Promise.all(listaDzwiekow.map(async nazwa_pliku => {
+            plikiAudio[nazwa_pliku] = await zaladujAudio(nazwa_pliku);
+        }));
+    };
 
     function zaladujAudio(nazwa_pliku) {
-        const audio = new Audio(`audio/${nazwa_pliku}.mp3`);
-        audio.preload = 'auto';
-        return audio;
+        return new Promise((resolve, reject) => {
+            const audio = new Audio(`audio/${nazwa_pliku}.mp3`);
+            audio.preload = 'auto';
+
+            audio.addEventListener("canplaythrough", () => resolve(audio), { once: true });
+            audio.addEventListener("error", () => reject(`Błąd ładowania: ${nazwa_pliku}.mp3`), { once: true });
+        });
     }
-    
-    const listaDzwiekow = ['stworz', 'przycisk', 'uruchom', 'usun', 'switch'];
-    const plikiAudio = {};
-    
-    listaDzwiekow.forEach(name => {
-        const audio = zaladujAudio(name);
-        plikiAudio[name] = audio;
-    });
-    
+
     function playSound(name) {
         plikiAudio[name].currentTime = 0;
-        plikiAudio[name].play()
+        plikiAudio[name].play();
     }
-    
-    
 
     //funkcja matematyczna
 
