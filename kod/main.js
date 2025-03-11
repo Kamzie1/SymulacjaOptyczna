@@ -1953,6 +1953,7 @@
         }
     
         przycisk.onclick = function(){
+            playSound("przycisk");
             localStorage.setItem('id_Obiektu', id);
             wyswietlWstazke("WŁAŚCIWOŚCI", id);
             rysuj();
