@@ -1195,8 +1195,12 @@
     }
 
     function playSound(name) {
-        plikiAudio[name].currentTime = 0;
-        plikiAudio[name].play();
+        if (plikiAudio[name]) {
+            plikiAudio[name].currentTime = 0;
+            plikiAudio[name].play().catch(err => console.error(`Błąd odtwarzania ${name}: ${err.message}`));
+        } else {
+            console.warn(`Plik audio ${name} nie został załadowany.`);
+        }
     }
 
     //funkcja matematyczna
